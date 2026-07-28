@@ -51,7 +51,6 @@ import {
   getProgramWeekNumber,
   getProgramWeekStartISO,
 } from './data/amisse.js';
-import { CHEESES, CHEESE_RULES, cheesePortions } from './data/cheeses.js';
 
 const PREFIX = 'family:';
 
@@ -69,7 +68,6 @@ const ICONS = {
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>`,
   leaf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14z"/><path d="M5 19c2-6 8-10 14-10"/></svg>`,
   euro: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6a8 8 0 1 0 0 12M5 10h8M5 14h8"/></svg>`,
-  cheese: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12c0-2 8-8 18-8 0 4-1 8-3 10H5a2 2 0 0 1-2-2z"/><circle cx="9" cy="12" r="1"/><circle cx="14" cy="10" r="1"/></svg>`,
 };
 
 const MEAL_ICONS = {
@@ -125,7 +123,6 @@ function renderShell() {
       <button class="nav-item" data-nav="dashboard">${ICONS.home}<span>Accueil</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="planning">${ICONS.calendar}<span>Planning</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="shopping">${ICONS.cart}<span>Courses</span><span class="nav-dot"></span></button>
-      <button class="nav-item" data-nav="cheeses">${ICONS.cheese}<span>Fromages</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="batch">${ICONS.pot}<span>Batch</span><span class="nav-dot"></span></button>
     </nav>
   `;
@@ -180,9 +177,6 @@ async function renderPage() {
     case 'shopping':
       page.innerHTML = await viewShopping();
       bindShopping();
-      break;
-    case 'cheeses':
-      page.innerHTML = viewCheeses();
       break;
     case 'batch':
       page.innerHTML = viewBatch();
@@ -602,36 +596,6 @@ function bindShopping() {
       renderPage();
     };
   });
-}
-
-/* ===== FROMAGES ===== */
-function viewCheeses() {
-  return `
-    <h1 class="page-title">Fromages légers</h1>
-    <p class="page-sub">Top 10 · portions famille & individuel</p>
-    <ul class="future-list surface" style="padding:0;margin-bottom:1rem">
-      ${CHEESE_RULES.map((r) => `<li>${r}</li>`).join('')}
-    </ul>
-    ${CHEESES.map((c) => {
-      const p = cheesePortions(c);
-      return `
-        <article class="batch-card cheese-card">
-          <h3>#${c.rank} · ${c.name}</h3>
-          <p>${c.tip}</p>
-          <div class="batch-meta">
-            <span class="tag">${c.kcal100} kcal/100g</span>
-            <span class="tag">${c.fat100} g lip/100g</span>
-          </div>
-          <div class="cheese-grid">
-            <div><strong>1 adulte</strong><span>${p.individual.grams} g · ${p.individual.calories} kcal</span></div>
-            <div><strong>Famille (4)</strong><span>${p.family.grams} g · ${p.family.calories} kcal</span></div>
-            <div><strong>Part adulte</strong><span>${p.adult.grams} g · ${p.adult.calories} kcal</span></div>
-            <div><strong>Enfant 10 ans</strong><span>${p.child10.grams} g · ${p.child10.calories} kcal</span></div>
-            <div><strong>Enfant 4 ans</strong><span>${p.child4.grams} g · ${p.child4.calories} kcal</span></div>
-          </div>
-        </article>`;
-    }).join('')}
-  `;
 }
 
 /* ===== BATCH ===== */

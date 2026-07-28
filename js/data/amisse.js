@@ -18,7 +18,8 @@ export const AMISSE = {
     'Protéines maigres · légumes · féculents IG modéré',
     'Exclus : skyr, avocat, brocoli',
     'Produits économiques Lidl / Aldi / Premier Prix',
-    'Fromages légers prioritaires (top 10 kcal)',
+    'Fromages légers prioritaires (intégrés aux repas & pizzas)',
+    'Pizzas : farine de sarrasin + farine de son (sam. & dim.)',
     'Batch cooking le dimanche',
     'Effectif ajustable chaque jour (+/− adulte / enfant)',
     'Démarrage : 1er août 2026 (Jour 1 = Lundi)',
@@ -276,12 +277,14 @@ export const AMISSE_WEEK = [
       { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
       { name: 'Huile d\'olive', qty: 20, unit: 'ml', cat: 'graisses' },
     ], 30, { calories: 2300, protein: 170, fat: 45, carbs: 220 }),
-    snack: meal('Fruits de saison', [
+    snack: meal('Feta + fruits', [
+      { name: 'Feta', qty: 100, unit: 'g', cat: 'laitiers' },
       { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
-      { name: 'Orange', qty: 2, unit: 'unités', cat: 'fruits' },
-    ], 2, { calories: 280, protein: 2, fat: 0, carbs: 70 }),
-    dinner: meal('Pizza sarrasin · légumes + escalope + mozzarella', [
-      { name: 'Farine de sarrasin', qty: 380, unit: 'g', cat: 'feculents' },
+      { name: 'Orange', qty: 1, unit: 'unité', cat: 'fruits' },
+    ], 3, { calories: 380, protein: 16, fat: 22, carbs: 45 }),
+    dinner: meal('Pizza sarrasin-son · légumes + escalope + mozzarella', [
+      { name: 'Farine de sarrasin', qty: 250, unit: 'g', cat: 'feculents' },
+      { name: 'Farine de son', qty: 130, unit: 'g', cat: 'feculents' },
       { name: 'Escalope de dinde (ou 3 boîtes thon)', qty: 450, unit: 'g', cat: 'viandes' },
       { name: 'Mozzarella', qty: 120, unit: 'g', cat: 'laitiers' },
       { name: 'Tomates', qty: 400, unit: 'g', cat: 'legumes' },
@@ -289,7 +292,7 @@ export const AMISSE_WEEK = [
       { name: 'Oignons', qty: 150, unit: 'g', cat: 'epicerie' },
       { name: 'Huile d\'olive', qty: 20, unit: 'ml', cat: 'graisses' },
       { name: 'Herbes de Provence', qty: 1, unit: 'c.à.c', cat: 'epicerie' },
-    ], 45, { calories: 2500, protein: 192, fat: 68, carbs: 275 }),
+    ], 45, { calories: 2480, protein: 195, fat: 66, carbs: 260 }),
   },
   {
     day: 7,
@@ -307,30 +310,34 @@ export const AMISSE_WEEK = [
       { name: 'Haricots verts', qty: 400, unit: 'g', cat: 'legumes' },
       { name: 'Huile d\'olive', qty: 20, unit: 'ml', cat: 'graisses' },
     ], 55, { calories: 2500, protein: 180, fat: 45, carbs: 250 }),
-    snack: meal('Feta + salade tomates', [
-      { name: 'Feta', qty: 100, unit: 'g', cat: 'laitiers' },
-      { name: 'Tomates', qty: 250, unit: 'g', cat: 'legumes' },
-      { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
-    ], 5, { calories: 334, protein: 16, fat: 22, carbs: 15 }),
-    dinner: meal('Camembert + soupe légumes (quartier / pers.)', [
-      { name: 'Camembert', qty: 100, unit: 'g', cat: 'laitiers' },
-      { name: 'Carottes', qty: 300, unit: 'g', cat: 'legumes' },
-      { name: 'Courgettes', qty: 300, unit: 'g', cat: 'legumes' },
-      { name: 'Oignons', qty: 100, unit: 'g', cat: 'epicerie' },
-      { name: 'Pain complet', qty: 100, unit: 'g', cat: 'feculents' },
-    ], 30, { calories: 780, protein: 32, fat: 30, carbs: 90 }),
+    snack: meal('Mont d\'Or + crudités', [
+      { name: 'Mont d\'Or', qty: 120, unit: 'g', cat: 'laitiers' },
+      { name: 'Tomates', qty: 200, unit: 'g', cat: 'legumes' },
+      { name: 'Carottes', qty: 150, unit: 'g', cat: 'legumes' },
+    ], 5, { calories: 400, protein: 22, fat: 30, carbs: 18 }),
+    dinner: meal('Pizza sarrasin-son · légumes + coulommiers + camembert', [
+      { name: 'Farine de sarrasin', qty: 250, unit: 'g', cat: 'feculents' },
+      { name: 'Farine de son', qty: 130, unit: 'g', cat: 'feculents' },
+      { name: 'Coulommiers', qty: 100, unit: 'g', cat: 'laitiers' },
+      { name: 'Camembert', qty: 80, unit: 'g', cat: 'laitiers' },
+      { name: 'Tomates', qty: 350, unit: 'g', cat: 'legumes' },
+      { name: 'Courgettes', qty: 250, unit: 'g', cat: 'legumes' },
+      { name: 'Oignons', qty: 120, unit: 'g', cat: 'epicerie' },
+      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
+      { name: 'Herbes de Provence', qty: 1, unit: 'c.à.c', cat: 'epicerie' },
+    ], 45, { calories: 2200, protein: 95, fat: 85, carbs: 240 }),
   },
 ];
 
 /** Portions indicatives par membre (coeff. famille = 3,25 parts adultes) */
 export const AMISSE_PORTIONS = [
-  { member: 'Adulte 1 & 2', hint: 'Assiette complète (~1 part) · fromage : part adulte du top 10' },
+  { member: 'Adulte 1 & 2', hint: 'Assiette complète (~1 part) · fromages intégrés aux repas / pizzas' },
   { member: 'Enfant 10 ans', hint: '≈ ¾ d’assiette · fromage ≈ ¾ part adulte' },
   { member: 'Enfant 4 ans', hint: '≈ ½ assiette · fromage ≈ ½ part · textures adaptées' },
 ];
 
 /**
- * Courses semaine famille — recalculées (pizza + top fromages légers)
+ * Courses semaine famille — pizzas sarrasin-son + fromages des menus
  */
 export const AMISSE_SHOPPING_WEEK = [
   { id: 'a-poulet', name: 'Blanc de poulet (surgelé)', qty: 2.55, unit: 'kg', cat: 'viandes', priceKey: 'Blanc de poulet' },
@@ -347,26 +354,29 @@ export const AMISSE_SHOPPING_WEEK = [
   { id: 'a-chevre', name: 'Chèvre frais', qty: 0.13, unit: 'kg', cat: 'laitiers', priceKey: 'Fromage de chèvre frais' },
   { id: 'a-feta', name: 'Feta', qty: 0.1, unit: 'kg', cat: 'laitiers', priceKey: 'Feta' },
   { id: 'a-mozza', name: 'Mozzarella', qty: 0.12, unit: 'kg', cat: 'laitiers', priceKey: 'Mozzarella' },
-  { id: 'a-cam', name: 'Camembert', qty: 0.1, unit: 'kg', cat: 'laitiers', priceKey: 'Camembert' },
+  { id: 'a-cam', name: 'Camembert', qty: 0.08, unit: 'kg', cat: 'laitiers', priceKey: 'Camembert' },
+  { id: 'a-coul', name: 'Coulommiers', qty: 0.1, unit: 'kg', cat: 'laitiers', priceKey: 'Coulommiers' },
+  { id: 'a-montdor', name: 'Mont d\'Or', qty: 0.12, unit: 'kg', cat: 'laitiers', priceKey: 'Mont d\'Or' },
   { id: 'a-oeufs', name: 'Œufs', qty: 46, unit: 'unités', cat: 'oeufs', priceKey: 'Œufs' },
   { id: 'a-riz', name: 'Riz basmati', qty: 1.31, unit: 'kg', cat: 'feculents', priceKey: 'Riz basmati' },
   { id: 'a-lent', name: 'Lentilles', qty: 0.53, unit: 'kg', cat: 'feculents', priceKey: 'Lentilles' },
   { id: 'a-pdt', name: 'Pommes de terre', qty: 2.4, unit: 'kg', cat: 'feculents', priceKey: 'Pomme de terre' },
   { id: 'a-avoine', name: 'Flocons d\'avoine', qty: 0.62, unit: 'kg', cat: 'feculents', priceKey: 'Flocons d\'avoine' },
-  { id: 'a-sarrasin', name: 'Farine de sarrasin', qty: 0.4, unit: 'kg', cat: 'feculents', priceKey: 'Farine de sarrasin' },
+  { id: 'a-sarrasin', name: 'Farine de sarrasin', qty: 0.5, unit: 'kg', cat: 'feculents', priceKey: 'Farine de sarrasin' },
+  { id: 'a-son', name: 'Farine de son', qty: 0.3, unit: 'kg', cat: 'feculents', priceKey: 'Farine de son' },
   { id: 'a-pain', name: 'Pain complet', qty: 2, unit: 'unités', cat: 'feculents', priceKey: 'Pain complet' },
   { id: 'a-hv', name: 'Haricots verts (surgelés)', qty: 1.5, unit: 'kg', cat: 'legumes', priceKey: 'Haricots verts' },
-  { id: 'a-courg', name: 'Courgettes', qty: 1.8, unit: 'kg', cat: 'legumes', priceKey: 'Courgettes' },
+  { id: 'a-courg', name: 'Courgettes', qty: 1.55, unit: 'kg', cat: 'legumes', priceKey: 'Courgettes' },
   { id: 'a-epi', name: 'Épinards (surgelés)', qty: 0.5, unit: 'kg', cat: 'legumes', priceKey: 'Épinards' },
-  { id: 'a-car', name: 'Carottes', qty: 1.85, unit: 'kg', cat: 'legumes', priceKey: 'Carottes' },
-  { id: 'a-tom', name: 'Tomates', qty: 2.3, unit: 'kg', cat: 'legumes', priceKey: 'Tomates' },
-  { id: 'a-sal', name: 'Salades', qty: 5, unit: 'unités', cat: 'legumes', priceKey: 'Salade' },
+  { id: 'a-car', name: 'Carottes', qty: 1.7, unit: 'kg', cat: 'legumes', priceKey: 'Carottes' },
+  { id: 'a-tom', name: 'Tomates', qty: 2.55, unit: 'kg', cat: 'legumes', priceKey: 'Tomates' },
+  { id: 'a-sal', name: 'Salades', qty: 4, unit: 'unités', cat: 'legumes', priceKey: 'Salade' },
   { id: 'a-pom', name: 'Pommes', qty: 13, unit: 'unités', cat: 'fruits', priceKey: 'Pomme' },
   { id: 'a-ban', name: 'Bananes', qty: 11, unit: 'unités', cat: 'fruits', priceKey: 'Banane' },
-  { id: 'a-ora', name: 'Oranges', qty: 4, unit: 'unités', cat: 'fruits', priceKey: 'Orange' },
+  { id: 'a-ora', name: 'Oranges', qty: 3, unit: 'unités', cat: 'fruits', priceKey: 'Orange' },
   { id: 'a-amd', name: 'Amandes', qty: 0.05, unit: 'kg', cat: 'graisses', priceKey: 'Amandes' },
   { id: 'a-huile', name: 'Huile d\'olive (quote-part)', qty: 0.28, unit: 'bouteille', cat: 'graisses', priceKey: 'Huile d\'olive' },
-  { id: 'a-oignon', name: 'Oignons', qty: 0.65, unit: 'kg', cat: 'epicerie', priceKey: 'Oignons' },
+  { id: 'a-oignon', name: 'Oignons', qty: 0.72, unit: 'kg', cat: 'epicerie', priceKey: 'Oignons' },
 ];
 
 export const AMISSE_BATCH = [
@@ -377,16 +387,10 @@ export const AMISSE_BATCH = [
     savedMin: 70,
   },
   {
-    name: 'Pâte pizza sarrasin',
-    tips: '380 g farine + eau + 1 c.à.s huile. Étaler fine. Garnir légumes + escalope (ou thon) + 120 g mozzarella. Four 220 °C · 15–18 min.',
-    timeMin: 45,
-    savedMin: 30,
-  },
-  {
-    name: 'Fromages légers portionnés',
-    tips: 'Top 10 kcal : blanc 0 %, cancoillotte, ricotta, frais, chèvre, feta, camembert, coulommiers, mozzarella, Mont d\'Or. Barquettes famille.',
-    timeMin: 10,
-    savedMin: 15,
+    name: 'Pâtes pizza sarrasin + son (×2)',
+    tips: 'Par pizza : 250 g sarrasin + 130 g farine de son + eau + 1 c.à.s huile. Étaler fine. Sam : légumes + escalope/thon + 120 g mozzarella. Dim : légumes + coulommiers + camembert. Four 220 °C · 15–18 min.',
+    timeMin: 55,
+    savedMin: 50,
   },
   {
     name: 'Riz + pommes de terre batch',
@@ -401,10 +405,10 @@ export const AMISSE_BATCH = [
     savedMin: 40,
   },
   {
-    name: 'Fromage blanc + fruits coupés',
-    tips: 'Collations enfants préparées en barquettes.',
+    name: 'Fromages des collations',
+    tips: 'Pré-portionner blanc 0 %, cancoillotte, ricotta, frais, chèvre, feta, Mont d\'Or pour la semaine.',
     timeMin: 15,
-    savedMin: 25,
+    savedMin: 20,
   },
 ];
 

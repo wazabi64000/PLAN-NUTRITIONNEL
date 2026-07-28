@@ -15,9 +15,10 @@ Palette **Nutrition 5** : `#D2EE6B` · `#00BCD4` · `#079AA9` · `#FCE006` · `#
 - **Accueil** — menus du jour · compteur +/− adultes / enfants · quantités recalculées
 - **Planning** — navigation **semaine par semaine** (précédent / suivant) · dès le **1er août 2026**
 - **Courses** — liste semaine type famille · cases mémorisées · prix estimés
-- **Fromages** — top 10 les moins caloriques · portions âge / famille
-- **Batch cooking** — session dimanche
+- **Batch cooking** — session dimanche · pizzas sarrasin + farine de son
 - **Dark / light** · mobile first · offline · installable
+
+Fromages légers intégrés aux collations et aux **pizzas samedi / dimanche** (pâte sarrasin + son).
 
 Seul ? Mets **Adultes = 1** et **Enfants = 0**.
 
@@ -33,7 +34,7 @@ python3 -m http.server 5173
 
 ### Installation PWA
 
-Manifest + service worker `v14` + icônes maskable.
+Manifest + service worker `v15` + icônes maskable.
 
 - Android / Chrome / Edge : bannière Installer
 - iPhone : Safari → Partager → Sur l’écran d’accueil
@@ -55,7 +56,6 @@ Manifest + service worker `v14` + icônes maskable.
     ├── utils.js
     └── data/
         ├── amisse.js    # Menus famille + scaling effectif
-        ├── cheeses.js   # Top 10 fromages
         ├── shopping.js  # Prix
         └── meals.js     # (archives / non utilisé UI)
 ```
