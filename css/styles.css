@@ -986,14 +986,14 @@ a {
 
 .nav-item {
   flex: 1;
-  max-width: 90px;
+  max-width: 76px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
+  gap: 0.15rem;
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 600;
   border-radius: 14px;
   transition: color 0.2s, background 0.2s;
@@ -1149,6 +1149,43 @@ a {
 
 .pwa-dot.on {
   background: var(--lime);
+}
+
+.amisse-hero {
+  background:
+    linear-gradient(145deg, rgba(242, 157, 6, 0.95), rgba(252, 224, 6, 0.75)),
+    radial-gradient(circle at 90% 10%, rgba(210, 238, 107, 0.4), transparent 40%) !important;
+  color: #1a2e0a !important;
+}
+
+.amisse-hero .eyebrow {
+  color: rgba(26, 46, 10, 0.75);
+}
+
+.member-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.member-chip {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(242, 157, 6, 0.18);
+  border: 1px solid rgba(242, 157, 6, 0.35);
+  color: var(--text);
+}
+
+.batch-card.amisse-today {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 1px rgba(242, 157, 6, 0.35);
+}
+
+.batch-card.amisse-today::before {
+  background: linear-gradient(var(--orange), var(--yellow));
 }
 
 /* ---- Animations ---- */

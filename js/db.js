@@ -54,11 +54,12 @@ export async function saveDaily(data) {
   });
 }
 
-export async function getOrCreateDaily(date) {
-  let d = await getDaily(date);
+export async function getOrCreateDaily(date, prefix = '') {
+  const key = prefix ? `${prefix}${date}` : date;
+  let d = await getDaily(key);
   if (!d) {
     d = {
-      date,
+      date: key,
       waterMl: 0,
       mealsDone: { breakfast: false, lunch: false, snack: false, dinner: false },
     };
@@ -67,19 +68,19 @@ export async function getOrCreateDaily(date) {
   return d;
 }
 
-export async function getShoppingChecks(week) {
+export async function getShoppingChecks(week, namespace = 'week') {
   const store = await tx('shopping');
   return new Promise((resolve, reject) => {
-    const req = store.get(`week-${week}`);
+    const req = store.get(`${namespace}-${week}`);
     req.onsuccess = () => resolve(req.result?.checked || {});
     req.onerror = () => reject(req.error);
   });
 }
 
-export async function saveShoppingChecks(week, checked) {
+export async function saveShoppingChecks(week, checked, namespace = 'week') {
   const store = await tx('shopping', 'readwrite');
   return new Promise((resolve, reject) => {
-    const req = store.put({ id: `week-${week}`, checked });
+    const req = store.put({ id: `${namespace}-${week}`, checked });
     req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });

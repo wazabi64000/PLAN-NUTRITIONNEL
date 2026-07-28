@@ -35,6 +35,16 @@ import {
   estimateCycleBudget,
   BATCH_ITEMS,
 } from './data/shopping.js';
+import {
+  AMISSE,
+  AMISSE_WEEK,
+  AMISSE_PORTIONS,
+  AMISSE_SHOPPING_WEEK,
+  AMISSE_BATCH,
+  getAmisseDayPlan,
+  getAmisseDayIndex,
+  amisseDayTotals,
+} from './data/amisse.js';
 
 /* ---------- Icons (inline SVG) ---------- */
 const ICONS = {
@@ -52,6 +62,7 @@ const ICONS = {
   leaf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14z"/><path d="M5 19c2-6 8-10 14-10"/></svg>`,
   euro: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6a8 8 0 1 0 0 12M5 10h8M5 14h8"/></svg>`,
   utensil: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v18M4 3c0 4 3 5 3 8M10 3c0 4-3 5-3 8M17 3v7a3 3 0 0 1-3 3v8"/></svg>`,
+  family: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6"/><path d="M14.5 20c.3-2.2 1.8-4 4-4.5 1.8.4 3.5 2 3.5 4.5"/></svg>`,
 };
 
 const MEAL_ICONS = {
@@ -70,6 +81,7 @@ const state = {
   cycleStart: null,
   goal: 'seche',
   theme: 'dark',
+  amisseTab: 'today', // today | week | shopping | batch
 };
 
 /* ---------- Toast ---------- */
@@ -102,8 +114,9 @@ function renderShell() {
     </header>
     <main id="page" class="page"></main>
     <nav class="bottom-nav" aria-label="Navigation principale">
-      <button class="nav-item" data-nav="dashboard">${ICONS.home}<span>Accueil</span><span class="nav-dot"></span></button>
+      <button class="nav-item" data-nav="dashboard">${ICONS.home}<span>Sport</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="planning">${ICONS.calendar}<span>Planning</span><span class="nav-dot"></span></button>
+      <button class="nav-item" data-nav="amisse">${ICONS.family}<span>Amisse</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="shopping">${ICONS.cart}<span>Courses</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="batch">${ICONS.pot}<span>Batch</span><span class="nav-dot"></span></button>
     </nav>
@@ -164,6 +177,10 @@ async function renderPage() {
     case 'batch':
       page.innerHTML = viewBatch();
       break;
+    case 'amisse':
+      page.innerHTML = await viewAmisse();
+      bindAmisse();
+      break;
     case 'settings':
       page.innerHTML = await viewSettings();
       bindSettings();
@@ -190,7 +207,7 @@ async function viewDashboard() {
 
   return `
     <div class="hero-dash">
-      <div class="eyebrow">Jour ${cycleDay} / ${CYCLE_DAYS} · Menu ${plan.phase}</div>
+      <div class="eyebrow">Sport · Jour ${cycleDay} / ${CYCLE_DAYS} · Menu ${plan.phase}</div>
       <h2>${state.goal === 'seche' ? 'Sèche en cours' : 'Prise de masse'}</h2>
       <p>${formatFR(today)} — ${left} repas restant${left > 1 ? 's' : ''}</p>
       <div class="progress-ring-wrap" aria-label="Progression ${pct}%">
@@ -249,9 +266,9 @@ async function viewDashboard() {
   `;
 }
 
-function renderMealCard(meal, type, done, dateISO) {
+function renderMealCard(meal, type, done, dateISO, prefix = '') {
   return `
-    <article class="meal-card ${done ? 'done' : ''}" data-meal="${type.id}" data-date="${dateISO}">
+    <article class="meal-card ${done ? 'done' : ''}" data-meal="${type.id}" data-date="${dateISO}" data-prefix="${prefix}">
       <button class="meal-card-head" type="button">
         <div class="meal-icon">${MEAL_ICONS[type.id]}</div>
         <div class="meal-meta">
@@ -304,8 +321,9 @@ function bindMealCards() {
       e.stopPropagation();
       const card = el.closest('.meal-card');
       const date = card.dataset.date;
+      const prefix = card.dataset.prefix || '';
       const meal = el.dataset.toggleMeal;
-      const d = await getOrCreateDaily(date);
+      const d = await getOrCreateDaily(date, prefix);
       d.mealsDone = d.mealsDone || {};
       d.mealsDone[meal] = !d.mealsDone[meal];
       await saveDaily(d);
@@ -527,6 +545,160 @@ function viewBatch() {
   `;
 }
 
+/* ===== AMISSE (famille) ===== */
+async function viewAmisse() {
+  const today = formatDateISO();
+  const dayPlan = getAmisseDayPlan(new Date());
+  const totals = amisseDayTotals(dayPlan);
+  const daily = await getOrCreateDaily(today, 'amisse:');
+  const left = remainingMeals(daily.mealsDone);
+  const shopTotal = estimateListTotal(AMISSE_SHOPPING_WEEK);
+
+  const tabs = `
+    <div class="day-nav">
+      <button class="chip ${state.amisseTab === 'today' ? 'active' : ''}" data-amisse="today">Aujourd'hui</button>
+      <button class="chip ${state.amisseTab === 'week' ? 'active' : ''}" data-amisse="week">Semaine</button>
+      <button class="chip ${state.amisseTab === 'shopping' ? 'active' : ''}" data-amisse="shopping">Courses</button>
+      <button class="chip ${state.amisseTab === 'batch' ? 'active' : ''}" data-amisse="batch">Batch</button>
+    </div>`;
+
+  let body = '';
+  if (state.amisseTab === 'today') {
+    body = `
+      <div class="hero-dash amisse-hero">
+        <div class="eyebrow">Famille Amisse · ${dayPlan.label}</div>
+        <h2>Manger sainement</h2>
+        <p>2 adultes · enfant 10 ans · enfant 4 ans — ${left} repas restants</p>
+      </div>
+      <div class="member-row">
+        ${AMISSE.members.map((m) => `<span class="member-chip">${m.label}</span>`).join('')}
+      </div>
+      <div class="section-label">Portions</div>
+      <div class="surface" style="margin-bottom:1rem">
+        ${AMISSE_PORTIONS.map((p) => `<div style="display:flex;justify-content:space-between;gap:.75rem;margin-bottom:.35rem"><strong>${p.member}</strong><span style="color:var(--text-muted);font-size:.85rem;text-align:right">${p.hint}</span></div>`).join('')}
+      </div>
+      <div class="section-label">Menus du jour · ${totals.calories} kcal famille · ${totals.protein} g protéines</div>
+      <div class="meal-list">
+        ${MEAL_TYPES.map((t) => renderMealCard(dayPlan[t.id], t, daily.mealsDone?.[t.id], today, 'amisse:')).join('')}
+      </div>
+      <div class="section-label">Principes</div>
+      <ul class="future-list surface" style="padding:0;margin-bottom:1rem">
+        ${AMISSE.principles.map((p) => `<li>${p}</li>`).join('')}
+      </ul>
+      <p class="page-sub">Le programme Sport (sèche / masse) reste inchangé dans les autres onglets.</p>
+    `;
+  } else if (state.amisseTab === 'week') {
+    body = `
+      <div class="section-label">Semaine type · rotation chaque lundi</div>
+      ${AMISSE_WEEK.map((d, idx) => {
+        const t = amisseDayTotals(d);
+        const isToday = idx === getAmisseDayIndex(new Date());
+        return `
+          <article class="batch-card ${isToday ? 'amisse-today' : ''}">
+            <h3>${d.label}${isToday ? ' · aujourd’hui' : ''}</h3>
+            <p>${d.breakfast.name} · ${d.lunch.name} · ${d.snack.name} · ${d.dinner.name}</p>
+            <div class="batch-meta">
+              <span class="tag">${t.calories} kcal</span>
+              <span class="tag">${t.protein} g prot</span>
+            </div>
+          </article>`;
+      }).join('')}
+    `;
+  } else if (state.amisseTab === 'shopping') {
+    const checked = await getShoppingChecks('family', 'amisse');
+    const checkedTotal = AMISSE_SHOPPING_WEEK.filter((i) => checked[i.id]).reduce(
+      (s, i) => s + estimateItemPrice(i),
+      0
+    );
+    const byCat = {};
+    AMISSE_SHOPPING_WEEK.forEach((item) => {
+      if (!byCat[item.cat]) byCat[item.cat] = [];
+      byCat[item.cat].push(item);
+    });
+    let catsHtml = '';
+    CATEGORIES.forEach((cat) => {
+      const items = byCat[cat.id];
+      if (!items?.length) return;
+      catsHtml += `
+        <div class="cat-block">
+          <div class="cat-title">${cat.label}</div>
+          ${items
+            .map((item) => {
+              const isChecked = !!checked[item.id];
+              return `
+              <button class="shop-item ${isChecked ? 'checked' : ''}" data-amisse-item="${item.id}" type="button">
+                <span class="checkbox">${isChecked ? ICONS.check : ''}</span>
+                <span class="item-info">
+                  <span class="item-name">${item.name}</span>
+                  <span class="item-qty">${item.qty} ${item.unit}</span>
+                </span>
+                <span class="item-price">${euro(estimateItemPrice(item))}</span>
+              </button>`;
+            })
+            .join('')}
+        </div>`;
+    });
+    body = `
+      <p class="page-sub">Courses semaine famille Amisse · Lidl / Aldi / Premier Prix</p>
+      <div class="shop-total">
+        <div>
+          <div class="label">Total estimé / semaine</div>
+          <div class="amount">${euro(shopTotal)}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="label">Coché</div>
+          <div style="font-family:var(--font-display);font-weight:700">${euro(checkedTotal)}</div>
+        </div>
+      </div>
+      ${catsHtml}
+    `;
+  } else {
+    body = `
+      <div class="sunday-banner" style="background:linear-gradient(135deg,var(--teal),var(--cyan))">
+        <h2>Batch famille Amisse</h2>
+        <p>Dimanche · repas sains pour 4 · mêmes bases que le plan nutritionnel</p>
+      </div>
+      ${AMISSE_BATCH.map(
+        (b) => `
+        <article class="batch-card">
+          <h3>${b.name}</h3>
+          <p>${b.tips}</p>
+          <div class="batch-meta">
+            <span class="tag">${b.timeMin} min</span>
+            <span class="tag save">−${b.savedMin} min</span>
+          </div>
+        </article>`
+      ).join('')}
+    `;
+  }
+
+  return `
+    <h1 class="page-title">Amisse</h1>
+    <p class="page-sub">Famille · alimentation saine · indépendant du programme sport</p>
+    ${tabs}
+    ${body}
+  `;
+}
+
+function bindAmisse() {
+  document.querySelectorAll('[data-amisse]').forEach((btn) => {
+    btn.onclick = () => {
+      state.amisseTab = btn.dataset.amisse;
+      renderPage();
+    };
+  });
+  document.querySelectorAll('[data-amisse-item]').forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.dataset.amisseItem;
+      const checked = await getShoppingChecks('family', 'amisse');
+      checked[id] = !checked[id];
+      await saveShoppingChecks('family', checked, 'amisse');
+      renderPage();
+    };
+  });
+  bindMealCards();
+}
+
 /* ===== SETTINGS ===== */
 async function viewSettings() {
   const budget = estimateCycleBudget();
@@ -534,7 +706,7 @@ async function viewSettings() {
 
   return `
     <h1 class="page-title">Réglages</h1>
-    <p class="page-sub">Données 100 % locales · aucun compte</p>
+    <p class="page-sub">Sport (sèche/masse) et famille Amisse · données 100 % locales</p>
 
     <div class="section-label">Objectif</div>
     <div class="setting-row">

@@ -12,7 +12,8 @@ Palette **Nutrition 5** : `#D2EE6B` · `#00BCD4` · `#079AA9` · `#FCE006` · `#
 
 ## Fonctionnalités
 
-- **Tableau de bord** — jour du cycle, repas restants, hydratation, budget
+- **Tableau de bord Sport** — sèche / prise de masse (inchangé)
+- **Section Amisse** — famille 2 adultes + enfants 4 & 10 ans · manger sainement
 - **Planning** — aujourd’hui / demain / calendrier · menus A & B (rotation 15 jours)
 - **Liste de courses** — semaines 1 à 8 · cases à cocher mémorisées · prix estimés
 - **Batch cooking** — session dimanche · temps gagné
@@ -39,7 +40,7 @@ Ouvrir [http://localhost:5173](http://localhost:5173).
 
 ### Installation PWA
 
-L’app est installable (manifest + service worker `v4` + icônes maskable).
+L’app est installable (manifest + service worker `v5` + icônes maskable).
 
 - **Android / Chrome / Edge** : bannière « Installer » ou menu → Installer l’application
 - **iPhone / iPad** : Safari → Partager → Sur l’écran d’accueil
@@ -63,8 +64,9 @@ Nécessite **HTTPS** ou **localhost** (la démo GitHub Pages convient).
 │   ├── db.js           # IndexedDB + LocalStorage
 │   ├── utils.js        # Cycle 60 j, dates, macros
 │   └── data/
-│       ├── meals.js    # Menus A & B (15 j × 2)
-│       └── shopping.js # Courses, prix, batch
+│       ├── meals.js      # Menus A & B (sport)
+│       ├── shopping.js   # Courses sport, prix, batch
+│       └── amisse.js     # Famille Amisse (sain)
 └── README.md
 ```
 
