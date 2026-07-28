@@ -1,7 +1,7 @@
 /**
  * Section Amisse — famille 2 adultes + enfants 4 ans & 10 ans
  * Manger sainement · Halal · économique · IG modéré
- * Indépendant du programme sèche / prise de masse
+ * Programme familial adaptable au nombre de personnes
  */
 
 export const AMISSE = {
@@ -30,10 +30,8 @@ export const PORTION_CHILD10 = 0.75;
 export const PORTION_CHILD4 = 0.5;
 /** Base des recettes Amisse (2 adultes + 10 ans + 4 ans) */
 export const AMISSE_BASE_COEFF = 2 * PORTION_ADULT + PORTION_CHILD10 + PORTION_CHILD4; // 3.25
-export const SPORT_BASE_COEFF = 1;
 
 export const DEFAULT_AMISSE_PEOPLE = { adults: 2, child10: 1, child4: 1 };
-export const DEFAULT_SPORT_PEOPLE = { adults: 1, child10: 0, child4: 0 };
 
 export function peopleCoeff(people = DEFAULT_AMISSE_PEOPLE) {
   const a = Math.max(0, Number(people.adults) || 0);
@@ -360,7 +358,7 @@ export const AMISSE_BATCH = [
   },
   {
     name: 'Fromages légers portionnés',
-    tips: 'Top 10 kcal : blanc 0 %, cancoillotte, ricotta, frais, chèvre, feta, camembert, coulommiers, mozzarella, Mont d\'Or. Barquettes famille / sport.',
+    tips: 'Top 10 kcal : blanc 0 %, cancoillotte, ricotta, frais, chèvre, feta, camembert, coulommiers, mozzarella, Mont d\'Or. Barquettes famille.',
     timeMin: 10,
     savedMin: 15,
   },

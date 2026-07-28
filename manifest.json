@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Meal Planner",
   "short_name": "Meal Planner",
-  "description": "Plan nutritionnel halal 60 jours — sèche & prise de masse. Offline, local.",
+  "description": "Menus famille halal adaptés au nombre de personnes. Offline, local.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

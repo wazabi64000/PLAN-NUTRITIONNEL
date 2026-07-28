@@ -1,6 +1,6 @@
 /**
  * Top 10 fromages les moins caloriques
- * Portions recalculées : individuel (sport) & famille Amisse (coeff 3,25)
+ * Portions recalculées : individuel & famille (coeff 3,25)
  */
 
 export const FAMILY_COEFF = 3.25; // 2 adultes + 0,75 + 0,5
