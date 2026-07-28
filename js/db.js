@@ -57,21 +57,18 @@ export async function saveDaily(data) {
 export async function getOrCreateDaily(date, prefix = '') {
   const key = prefix ? `${prefix}${date}` : date;
   let d = await getDaily(key);
+  const defaultPeople = { adults: 2, child10: 1, child4: 1 };
   if (!d) {
     d = {
       date: key,
       waterMl: 0,
       mealsDone: { breakfast: false, lunch: false, snack: false, dinner: false },
-      people: prefix.startsWith('amisse')
-        ? { adults: 2, child10: 1, child4: 1 }
-        : { adults: 1, child10: 0, child4: 0 },
+      people: defaultPeople,
     };
     await saveDaily(d);
   }
   if (!d.people) {
-    d.people = prefix.startsWith('amisse')
-      ? { adults: 2, child10: 1, child4: 1 }
-      : { adults: 1, child10: 0, child4: 0 };
+    d.people = defaultPeople;
     await saveDaily(d);
   }
   return d;
@@ -144,6 +141,5 @@ export async function initDB() {
     today.setHours(0, 0, 0, 0);
     await setSetting('cycleStart', today.toISOString());
   }
-  if ((await getSetting('goal')) === null) await setSetting('goal', 'seche');
   if ((await getSetting('theme')) === null) await setSetting('theme', 'dark');
 }

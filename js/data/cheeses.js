@@ -147,6 +147,6 @@ export const CHEESE_RULES = [
   'Plus un fromage contient d’eau, moins il est calorique.',
   'Privilégier : blanc, frais, pâtes molles, chèvre frais.',
   'Limiter les pâtes dures (très caloriques).',
-  'Sport (sèche) : favoriser fromage blanc 0 % & cancoillotte.',
-  'Famille : mêmes fromages, portions adaptées à l’âge.',
+  '1 adulte : portions individuelles du top 10.',
+  'Famille : mêmes fromages, parts adaptées à l’âge (+/− effectif).',
 ];

@@ -1,5 +1,6 @@
 /**
- * Meal Planner — application PWA principale
+ * Meal Planner — famille adaptable (Amisse)
+ * Quantités recalculées selon le nombre de personnes présentes
  */
 import {
   initDB,
@@ -15,26 +16,17 @@ import {
   formatDateISO,
   addDays,
   formatFR,
-  formatShort,
   parseISO,
-  getCycleDay,
-  getCycleWeek,
-  getDayPlan,
-  dayTotals,
   remainingMeals,
   isSunday,
   euro,
   MEAL_TYPES,
   WATER_TARGET_ML,
-  CYCLE_DAYS,
 } from './utils.js';
 import {
-  WEEKLY_LISTS,
   CATEGORIES,
   estimateItemPrice,
   estimateListTotal,
-  estimateCycleBudget,
-  BATCH_ITEMS,
 } from './data/shopping.js';
 import {
   AMISSE,
@@ -43,7 +35,6 @@ import {
   AMISSE_SHOPPING_WEEK,
   AMISSE_BATCH,
   AMISSE_BASE_COEFF,
-  SPORT_BASE_COEFF,
   getAmisseDayPlan,
   getAmisseDayIndex,
   amisseDayTotals,
@@ -51,10 +42,12 @@ import {
   peopleCoeff,
   peopleCount,
   clampPeople,
+  DEFAULT_AMISSE_PEOPLE,
 } from './data/amisse.js';
 import { CHEESES, CHEESE_RULES, cheesePortions } from './data/cheeses.js';
 
-/* ---------- Icons (inline SVG) ---------- */
+const PREFIX = 'family:';
+
 const ICONS = {
   home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5z"/></svg>`,
   calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>`,
@@ -69,8 +62,7 @@ const ICONS = {
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>`,
   leaf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14z"/><path d="M5 19c2-6 8-10 14-10"/></svg>`,
   euro: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6a8 8 0 1 0 0 12M5 10h8M5 14h8"/></svg>`,
-  utensil: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v18M4 3c0 4 3 5 3 8M10 3c0 4-3 5-3 8M17 3v7a3 3 0 0 1-3 3v8"/></svg>`,
-  family: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6"/><path d="M14.5 20c.3-2.2 1.8-4 4-4.5 1.8.4 3.5 2 3.5 4.5"/></svg>`,
+  cheese: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12c0-2 8-8 18-8 0 4-1 8-3 10H5a2 2 0 0 1-2-2z"/><circle cx="9" cy="12" r="1"/><circle cx="14" cy="10" r="1"/></svg>`,
 };
 
 const MEAL_ICONS = {
@@ -80,20 +72,12 @@ const MEAL_ICONS = {
   dinner: ICONS.moon,
 };
 
-/* ---------- State ---------- */
 const state = {
   route: 'dashboard',
-  planView: 'today', // today | tomorrow | calendar
   selectedDate: formatDateISO(),
-  shopWeek: 1,
-  cycleStart: null,
-  goal: 'seche',
   theme: 'dark',
-  amisseTab: 'today', // today | week | cheeses | shopping | batch
-  amisseSelectedDate: formatDateISO(),
 };
 
-/* ---------- Toast ---------- */
 function toast(msg) {
   let el = document.querySelector('.toast');
   if (!el) {
@@ -107,7 +91,15 @@ function toast(msg) {
   el._t = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
-/* ---------- Shell ---------- */
+function familyBudget() {
+  const week = estimateListTotal(AMISSE_SHOPPING_WEEK.filter((i) => i.id !== 'a-thon-alt'));
+  return {
+    week,
+    month: Math.round(week * 4.3 * 100) / 100,
+    days60: Math.round(week * 8.5 * 100) / 100,
+  };
+}
+
 function renderShell() {
   const app = document.getElementById('app');
   app.innerHTML = `
@@ -123,10 +115,10 @@ function renderShell() {
     </header>
     <main id="page" class="page"></main>
     <nav class="bottom-nav" aria-label="Navigation principale">
-      <button class="nav-item" data-nav="dashboard">${ICONS.home}<span>Sport</span><span class="nav-dot"></span></button>
+      <button class="nav-item" data-nav="dashboard">${ICONS.home}<span>Accueil</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="planning">${ICONS.calendar}<span>Planning</span><span class="nav-dot"></span></button>
-      <button class="nav-item" data-nav="amisse">${ICONS.family}<span>Amisse</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="shopping">${ICONS.cart}<span>Courses</span><span class="nav-dot"></span></button>
+      <button class="nav-item" data-nav="cheeses">${ICONS.cheese}<span>Fromages</span><span class="nav-dot"></span></button>
       <button class="nav-item" data-nav="batch">${ICONS.pot}<span>Batch</span><span class="nav-dot"></span></button>
     </nav>
   `;
@@ -164,7 +156,6 @@ function navigate(route) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ---------- Pages ---------- */
 async function renderPage() {
   const page = document.getElementById('page');
   if (!page) return;
@@ -183,12 +174,11 @@ async function renderPage() {
       page.innerHTML = await viewShopping();
       bindShopping();
       break;
+    case 'cheeses':
+      page.innerHTML = viewCheeses();
+      break;
     case 'batch':
       page.innerHTML = viewBatch();
-      break;
-    case 'amisse':
-      page.innerHTML = await viewAmisse();
-      bindAmisse();
       break;
     case 'settings':
       page.innerHTML = await viewSettings();
@@ -196,92 +186,13 @@ async function renderPage() {
       break;
     default:
       page.innerHTML = await viewDashboard();
+      bindDashboard();
   }
 }
 
-/* ===== DASHBOARD ===== */
-async function viewDashboard() {
-  const today = formatDateISO();
-  const cycleDay = getCycleDay(state.cycleStart, today);
-  const basePlan = getDayPlan(cycleDay, state.goal);
-  const daily = await getOrCreateDaily(today);
-  const people = clampPeople(daily.people);
-  const plan = scalePlan(basePlan, people, SPORT_BASE_COEFF);
-  const totals = dayTotals(plan);
-  const left = remainingMeals(daily.mealsDone);
-  const budget = estimateCycleBudget();
-  const pct = Math.round((cycleDay / CYCLE_DAYS) * 100);
-  const r = 28;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (pct / 100) * circ;
-  const waterPct = Math.min(100, Math.round((daily.waterMl / WATER_TARGET_ML) * 100));
-
-  return `
-    <div class="hero-dash">
-      <div class="eyebrow">Sport · Jour ${cycleDay} / ${CYCLE_DAYS} · Menu ${plan.phase}</div>
-      <h2>${state.goal === 'seche' ? 'Sèche en cours' : 'Prise de masse'}</h2>
-      <p>${formatFR(today)} — ${left} repas restant${left > 1 ? 's' : ''}</p>
-      <div class="progress-ring-wrap" aria-label="Progression ${pct}%">
-        <svg class="progress-ring" viewBox="0 0 72 72">
-          <circle class="track" cx="36" cy="36" r="${r}"/>
-          <circle class="value" cx="36" cy="36" r="${r}"
-            stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
-        </svg>
-        <div class="progress-ring-label">${pct}%</div>
-      </div>
-    </div>
-
-    ${renderPeoplePanel(people, today, '', SPORT_BASE_COEFF)}
-
-    <div class="stat-grid">
-      <div class="stat-card water">
-        <div class="stat-icon">${ICONS.drop}</div>
-        <span class="stat-label">Hydratation</span>
-        <span class="stat-value">${(daily.waterMl / 1000).toFixed(1)} / 2,5 L</span>
-        <div class="water-bar"><span style="width:${waterPct}%"></span></div>
-      </div>
-      <div class="stat-card meals">
-        <div class="stat-icon">${ICONS.utensil}</div>
-        <span class="stat-label">Repas restants</span>
-        <span class="stat-value">${left} / 4</span>
-      </div>
-      <div class="stat-card budget">
-        <div class="stat-icon">${ICONS.euro}</div>
-        <span class="stat-label">Budget / semaine</span>
-        <span class="stat-value">${euro(budget.week)}</span>
-      </div>
-      <div class="stat-card meals">
-        <div class="stat-icon">${ICONS.leaf}</div>
-        <span class="stat-label">Menu</span>
-        <span class="stat-value">Phase ${plan.phase}</span>
-      </div>
-    </div>
-
-    <div class="section-label">Hydratation rapide</div>
-    <div class="surface" style="margin-bottom:1rem">
-      <div class="water-actions">
-        <button class="btn btn-ghost" data-water="250">+250 ml</button>
-        <button class="btn btn-ghost" data-water="500">+500 ml</button>
-        <button class="btn btn-primary" data-water="reset">Reset</button>
-      </div>
-    </div>
-
-    <div class="section-label">Aujourd'hui · ${totals.calories} kcal · ${totals.protein} g protéines · ${peopleCount(people)} pers.</div>
-    <div class="meal-list">
-      ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], today)).join('')}
-    </div>
-
-    <div class="section-label">Budget cycle</div>
-    <div class="surface">
-      <div style="display:flex;justify-content:space-between;margin-bottom:.5rem"><span>Par mois</span><strong>${euro(budget.month)}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span>60 jours</span><strong style="color:var(--orange)">${euro(budget.days60)}</strong></div>
-    </div>
-  `;
-}
-
-function renderPeoplePanel(people, dateISO, prefix, baseCoeff) {
+function renderPeoplePanel(people, dateISO) {
   const coeff = peopleCoeff(people);
-  const factor = baseCoeff > 0 ? coeff / baseCoeff : 1;
+  const factor = coeff / AMISSE_BASE_COEFF;
   const rows = [
     { key: 'adults', label: 'Adultes', hint: 'part 1' },
     { key: 'child10', label: 'Enfants 10 ans', hint: 'part 0,75' },
@@ -289,7 +200,7 @@ function renderPeoplePanel(people, dateISO, prefix, baseCoeff) {
   ];
   return `
     <div class="section-label">Personnes présentes</div>
-    <div class="people-panel surface" data-people-date="${dateISO}" data-people-prefix="${prefix}" data-people-base="${baseCoeff}">
+    <div class="people-panel surface" data-people-date="${dateISO}" data-people-prefix="${PREFIX}" data-people-base="${AMISSE_BASE_COEFF}">
       ${rows
         .map(
           (row) => `
@@ -310,6 +221,7 @@ function renderPeoplePanel(people, dateISO, prefix, baseCoeff) {
         <span>${peopleCount(people)} personne${peopleCount(people) > 1 ? 's' : ''}</span>
         <strong>×${factor.toFixed(2)} · coeff ${coeff.toFixed(2)}</strong>
       </div>
+      <p class="page-sub" style="margin:.55rem 0 0">Seul ? Adultes = 1 · Enfants = 0</p>
     </div>
   `;
 }
@@ -319,27 +231,25 @@ function bindPeoplePanel() {
     btn.onclick = async () => {
       const panel = btn.closest('.people-panel');
       const date = panel.dataset.peopleDate;
-      const prefix = panel.dataset.peoplePrefix || '';
+      const prefix = panel.dataset.peoplePrefix || PREFIX;
       const key = btn.dataset.peopleKey;
       const delta = Number(btn.dataset.peopleDelta);
       const d = await getOrCreateDaily(date, prefix);
-      const people = clampPeople({
-        ...d.people,
+      d.people = clampPeople({
+        ...(d.people || DEFAULT_AMISSE_PEOPLE),
         [key]: (Number(d.people?.[key]) || 0) + delta,
       });
-      d.people = people;
       await saveDaily(d);
-      toast(
-        `${peopleCount(people)} pers. · quantités ×${(peopleCoeff(people) / Number(panel.dataset.peopleBase)).toFixed(2)}`
-      );
+      const factor = peopleCoeff(d.people) / AMISSE_BASE_COEFF;
+      toast(`${peopleCount(d.people)} pers. · quantités ×${factor.toFixed(2)}`);
       renderPage();
     };
   });
 }
 
-function renderMealCard(meal, type, done, dateISO, prefix = '') {
+function renderMealCard(meal, type, done, dateISO) {
   return `
-    <article class="meal-card ${done ? 'done' : ''}" data-meal="${type.id}" data-date="${dateISO}" data-prefix="${prefix}">
+    <article class="meal-card ${done ? 'done' : ''}" data-meal="${type.id}" data-date="${dateISO}" data-prefix="${PREFIX}">
       <button class="meal-card-head" type="button">
         <div class="meal-icon">${MEAL_ICONS[type.id]}</div>
         <div class="meal-meta">
@@ -364,23 +274,6 @@ function renderMealCard(meal, type, done, dateISO, prefix = '') {
   `;
 }
 
-function bindDashboard() {
-  bindPeoplePanel();
-  document.querySelectorAll('[data-water]').forEach((btn) => {
-    btn.onclick = async () => {
-      const today = formatDateISO();
-      const d = await getOrCreateDaily(today);
-      const v = btn.dataset.water;
-      if (v === 'reset') d.waterMl = 0;
-      else d.waterMl = Math.min(4000, d.waterMl + Number(v));
-      await saveDaily(d);
-      renderPage();
-    };
-  });
-
-  bindMealCards();
-}
-
 function bindMealCards() {
   document.querySelectorAll('.meal-card-head').forEach((btn) => {
     btn.onclick = (e) => {
@@ -392,11 +285,9 @@ function bindMealCards() {
     el.onclick = async (e) => {
       e.stopPropagation();
       const card = el.closest('.meal-card');
-      const date = card.dataset.date;
-      const prefix = card.dataset.prefix || '';
-      const meal = el.dataset.toggleMeal;
-      const d = await getOrCreateDaily(date, prefix);
+      const d = await getOrCreateDaily(card.dataset.date, card.dataset.prefix || PREFIX);
       d.mealsDone = d.mealsDone || {};
+      const meal = el.dataset.toggleMeal;
       d.mealsDone[meal] = !d.mealsDone[meal];
       await saveDaily(d);
       toast(d.mealsDone[meal] ? 'Repas validé ✓' : 'Repas décoché');
@@ -405,131 +296,198 @@ function bindMealCards() {
   });
 }
 
-/* ===== PLANNING ===== */
-async function viewPlanning() {
+/* ===== ACCUEIL ===== */
+async function viewDashboard() {
   const today = formatDateISO();
-  let date = today;
-  if (state.planView === 'tomorrow') date = addDays(today, 1);
-  else if (state.planView === 'day' || state.planView === 'today') date = state.selectedDate || today;
+  const daily = await getOrCreateDaily(today, PREFIX);
+  const people = clampPeople(daily.people || DEFAULT_AMISSE_PEOPLE);
+  const plan = scalePlan(getAmisseDayPlan(new Date()), people, AMISSE_BASE_COEFF);
+  const totals = amisseDayTotals(plan);
+  const left = remainingMeals(daily.mealsDone);
+  const budget = familyBudget();
+  const waterPct = Math.min(100, Math.round((daily.waterMl / WATER_TARGET_ML) * 100));
 
-  if (state.planView === 'calendar') {
-    return `
-      <h1 class="page-title">Planning</h1>
-      <p class="page-sub">Cycle automatique · rotation A / B tous les 15 jours</p>
-      <div class="day-nav">
-        <button class="chip" data-plan="today">Aujourd'hui</button>
-        <button class="chip" data-plan="tomorrow">Demain</button>
-        <button class="chip active" data-plan="calendar">Calendrier</button>
+  return `
+    <div class="hero-dash amisse-hero">
+      <div class="eyebrow">${AMISSE.name} · ${plan.label}</div>
+      <h2>Famille adaptable</h2>
+      <p>${peopleCount(people)} personne${peopleCount(people) > 1 ? 's' : ''} · ${left} repas restants</p>
+    </div>
+
+    ${renderPeoplePanel(people, today)}
+
+    <div class="stat-grid">
+      <div class="stat-card water">
+        <div class="stat-icon">${ICONS.drop}</div>
+        <span class="stat-label">Hydratation</span>
+        <span class="stat-value">${(daily.waterMl / 1000).toFixed(1)} / 2,5 L</span>
+        <div class="water-bar"><span style="width:${waterPct}%"></span></div>
       </div>
-      ${renderCalendar(today)}
-    `;
-  }
-
-  const cycleDay = getCycleDay(state.cycleStart, date);
-  const basePlan = getDayPlan(cycleDay, state.goal);
-  const daily = await getOrCreateDaily(date);
-  const people = clampPeople(daily.people);
-  const plan = scalePlan(basePlan, people, SPORT_BASE_COEFF);
-  const totals = dayTotals(plan);
-  const isCustom = state.planView === 'day' && date !== today && date !== addDays(today, 1);
-
-  return `
-    <h1 class="page-title">Planning</h1>
-    <p class="page-sub">Cycle automatique · rotation A / B tous les 15 jours</p>
-    <div class="day-nav">
-      <button class="chip ${state.planView === 'today' ? 'active' : ''}" data-plan="today">Aujourd'hui</button>
-      <button class="chip ${state.planView === 'tomorrow' ? 'active' : ''}" data-plan="tomorrow">Demain</button>
-      <button class="chip" data-plan="calendar">Calendrier</button>
-      ${isCustom ? `<button class="chip active accent">Jour ${cycleDay}</button>` : ''}
+      <div class="stat-card meals">
+        <div class="stat-icon">${ICONS.home}</div>
+        <span class="stat-label">Repas restants</span>
+        <span class="stat-value">${left} / 4</span>
+      </div>
+      <div class="stat-card budget">
+        <div class="stat-icon">${ICONS.euro}</div>
+        <span class="stat-label">Courses / semaine*</span>
+        <span class="stat-value">${euro(budget.week)}</span>
+      </div>
+      <div class="stat-card meals">
+        <div class="stat-icon">${ICONS.leaf}</div>
+        <span class="stat-label">Facteur quantités</span>
+        <span class="stat-value">×${plan.factor.toFixed(2)}</span>
+      </div>
     </div>
-    <p class="page-sub" style="margin-top:-.4rem;text-transform:capitalize">${formatFR(date)}</p>
-    ${renderPeoplePanel(people, date, '', SPORT_BASE_COEFF)}
-    <div class="section-label">Jour ${cycleDay} · Menu ${plan.phase}${plan.phase === 'A' ? ' (base)' : ' (variation)'} · ${totals.calories} kcal · ${peopleCount(people)} pers.</div>
+    <p class="page-sub">* Budget courses = liste famille type (4 pers.)</p>
+
+    <div class="section-label">Hydratation</div>
+    <div class="surface" style="margin-bottom:1rem">
+      <div class="water-actions">
+        <button class="btn btn-ghost" data-water="250">+250 ml</button>
+        <button class="btn btn-ghost" data-water="500">+500 ml</button>
+        <button class="btn btn-primary" data-water="reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="section-label">Aujourd'hui · ${totals.calories} kcal · ${totals.protein} g protéines</div>
     <div class="meal-list">
-      ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], date)).join('')}
+      ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], today)).join('')}
+    </div>
+
+    <div class="section-label">Portions de référence</div>
+    <div class="surface" style="margin-bottom:1rem">
+      ${AMISSE_PORTIONS.map((p) => `<div style="display:flex;justify-content:space-between;gap:.75rem;margin-bottom:.35rem"><strong>${p.member}</strong><span style="color:var(--text-muted);font-size:.85rem;text-align:right">${p.hint}</span></div>`).join('')}
     </div>
   `;
 }
 
-function renderCalendar(todayISO) {
-  const start = new Date();
-  start.setDate(1);
-  const year = start.getFullYear();
-  const month = start.getMonth();
-  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // mon=0
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthName = start.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-
-  let cells = '';
-  ['L', 'M', 'M', 'J', 'V', 'S', 'D'].forEach((d) => {
-    cells += `<div class="cal-head">${d}</div>`;
-  });
-  for (let i = 0; i < firstDow; i++) cells += `<div class="cal-day empty"></div>`;
-  for (let d = 1; d <= daysInMonth; d++) {
-    const iso = formatDateISO(new Date(year, month, d));
-    const cd = getCycleDay(state.cycleStart, iso);
-    const phase = getDayPlan(cd, state.goal).phase;
-    const isToday = iso === todayISO;
-    const selected = iso === state.selectedDate;
-    cells += `
-      <button class="cal-day ${isToday ? 'today' : ''} ${selected ? 'selected' : ''}" data-cal="${iso}">
-        ${d}<span class="phase">${phase}</span>
-      </button>`;
-  }
-
-  return `
-    <div class="section-label" style="text-transform:capitalize">${monthName}</div>
-    <div class="cal-grid">${cells}</div>
-    <p class="page-sub" style="margin-top:1rem">Touchez un jour pour voir les repas. A / B = phase du menu.</p>
-  `;
-}
-
-function bindPlanning() {
+function bindDashboard() {
   bindPeoplePanel();
-  document.querySelectorAll('[data-plan]').forEach((btn) => {
-    btn.onclick = () => {
-      state.planView = btn.dataset.plan;
-      if (btn.dataset.plan === 'today') state.selectedDate = formatDateISO();
-      if (btn.dataset.plan === 'tomorrow') state.selectedDate = addDays(formatDateISO(), 1);
-      renderPage();
-    };
-  });
-  document.querySelectorAll('[data-cal]').forEach((btn) => {
-    btn.onclick = () => {
-      state.selectedDate = btn.dataset.cal;
-      state.planView = 'day';
+  document.querySelectorAll('[data-water]').forEach((btn) => {
+    btn.onclick = async () => {
+      const d = await getOrCreateDaily(formatDateISO(), PREFIX);
+      const v = btn.dataset.water;
+      if (v === 'reset') d.waterMl = 0;
+      else d.waterMl = Math.min(4000, (d.waterMl || 0) + Number(v));
+      await saveDaily(d);
       renderPage();
     };
   });
   bindMealCards();
 }
 
-/* ===== SHOPPING ===== */
-async function viewShopping() {
+/* ===== PLANNING ===== */
+async function viewPlanning() {
   const today = formatDateISO();
-  const cycleDay = getCycleDay(state.cycleStart, today);
-  const currentWeek = Math.min(8, getCycleWeek(cycleDay));
-  if (!state.shopWeek) state.shopWeek = currentWeek;
+  const selected = state.selectedDate || today;
+  const daily = await getOrCreateDaily(selected, PREFIX);
+  const people = clampPeople(daily.people || DEFAULT_AMISSE_PEOPLE);
+  const plan = scalePlan(getAmisseDayPlan(parseISO(selected)), people, AMISSE_BASE_COEFF);
+  const totals = amisseDayTotals(plan);
 
-  const list = WEEKLY_LISTS[state.shopWeek] || [];
-  const checked = await getShoppingChecks(state.shopWeek);
-  const total = estimateListTotal(list);
-  const checkedTotal = list
-    .filter((i) => checked[i.id])
-    .reduce((s, i) => s + estimateItemPrice(i), 0);
+  return `
+    <h1 class="page-title">Planning</h1>
+    <p class="page-sub">Programme semaine · adaptable au nombre de personnes</p>
+    ${renderCalendar(today, selected)}
+    ${renderPeoplePanel(people, selected)}
+    <div class="amisse-week-strip">
+      ${AMISSE_WEEK.map((d, idx) => {
+        const isToday = idx === getAmisseDayIndex(new Date());
+        const isSelected = idx === getAmisseDayIndex(parseISO(selected));
+        return `
+          <button type="button" class="amisse-week-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''}" data-weekday="${idx}">
+            <strong>${d.label.slice(0, 3)}</strong>
+            <span>${d.dinner.name.split('·')[0].trim().slice(0, 18)}</span>
+          </button>`;
+      }).join('')}
+    </div>
+    <div class="section-label" style="text-transform:capitalize">${formatFR(selected)} · ${plan.label}</div>
+    <p class="page-sub" style="margin-top:-.35rem">${totals.calories} kcal · ${totals.protein} g prot · ${peopleCount(people)} pers. · ×${plan.factor.toFixed(2)}</p>
+    <div class="meal-list">
+      ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], selected)).join('')}
+    </div>
+    <div class="section-label">Récap semaine (base 4 pers.)</div>
+    ${AMISSE_WEEK.map((d, idx) => {
+      const t = amisseDayTotals(d);
+      const isToday = idx === getAmisseDayIndex(new Date());
+      const isSelected = idx === getAmisseDayIndex(parseISO(selected));
+      return `
+        <button type="button" class="batch-card ${isToday ? 'amisse-today' : ''} ${isSelected ? 'is-selected' : ''}" data-weekday="${idx}">
+          <h3>${d.label}${isToday ? ' · aujourd’hui' : ''}</h3>
+          <p>${d.breakfast.name} · ${d.lunch.name}<br>${d.snack.name} · ${d.dinner.name}</p>
+          <div class="batch-meta">
+            <span class="tag">${t.calories} kcal</span>
+            <span class="tag">${t.protein} g prot</span>
+          </div>
+        </button>`;
+    }).join('')}
+  `;
+}
 
+function renderCalendar(todayISO, selectedISO) {
+  const base = parseISO(selectedISO || todayISO);
+  const year = base.getFullYear();
+  const month = base.getMonth();
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = new Date(year, month, 1).toLocaleDateString('fr-FR', {
+    month: 'long',
+    year: 'numeric',
+  });
+
+  let cells = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+    .map((d) => `<div class="cal-head">${d}</div>`)
+    .join('');
+  for (let i = 0; i < firstDow; i++) cells += `<div class="cal-day empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = formatDateISO(new Date(year, month, d));
+    const plan = getAmisseDayPlan(new Date(year, month, d));
+    cells += `
+      <button class="cal-day amisse-cal ${iso === todayISO ? 'today' : ''} ${iso === selectedISO ? 'selected' : ''}" data-cal="${iso}" type="button">
+        <span class="cal-num">${d}</span>
+        <span class="phase">${plan.label.slice(0, 3)}</span>
+      </button>`;
+  }
+
+  return `
+    <div class="section-label" style="text-transform:capitalize">${monthName}</div>
+    <div class="cal-grid amisse-cal-grid">${cells}</div>
+    <p class="page-sub" style="margin-top:.85rem">Lun→Dim en boucle · quantités selon l’effectif du jour</p>
+  `;
+}
+
+function bindPlanning() {
+  bindPeoplePanel();
+  document.querySelectorAll('[data-cal]').forEach((btn) => {
+    btn.onclick = () => {
+      state.selectedDate = btn.dataset.cal;
+      renderPage();
+    };
+  });
+  document.querySelectorAll('[data-weekday]').forEach((btn) => {
+    btn.onclick = () => {
+      const idx = Number(btn.dataset.weekday);
+      const ref = state.selectedDate || formatDateISO();
+      const refIdx = getAmisseDayIndex(parseISO(ref));
+      state.selectedDate = addDays(ref, idx - refIdx);
+      renderPage();
+    };
+  });
+  bindMealCards();
+}
+
+/* ===== COURSES ===== */
+async function viewShopping() {
+  const list = AMISSE_SHOPPING_WEEK;
+  const checked = await getShoppingChecks('family', 'amisse');
+  const total = estimateListTotal(list.filter((i) => i.id !== 'a-thon-alt'));
+  const checkedTotal = list.filter((i) => checked[i.id]).reduce((s, i) => s + estimateItemPrice(i), 0);
   const byCat = {};
   list.forEach((item) => {
     if (!byCat[item.cat]) byCat[item.cat] = [];
     byCat[item.cat].push(item);
   });
-
-  const weeks = Array.from({ length: 8 }, (_, i) => i + 1)
-    .map(
-      (w) =>
-        `<button class="chip ${w === state.shopWeek ? 'active' : ''} ${w === currentWeek ? 'accent' : ''}" data-week="${w}">S${w}</button>`
-    )
-    .join('');
 
   let catsHtml = '';
   CATEGORIES.forEach((cat) => {
@@ -541,7 +499,6 @@ async function viewShopping() {
         ${items
           .map((item) => {
             const isChecked = !!checked[item.id];
-            const price = estimateItemPrice(item);
             return `
             <button class="shop-item ${isChecked ? 'checked' : ''}" data-item="${item.id}" type="button">
               <span class="checkbox">${isChecked ? ICONS.check : ''}</span>
@@ -549,7 +506,7 @@ async function viewShopping() {
                 <span class="item-name">${item.name}</span>
                 <span class="item-qty">${item.qty} ${item.unit}</span>
               </span>
-              <span class="item-price">${euro(price)}</span>
+              <span class="item-price">${euro(estimateItemPrice(item))}</span>
             </button>`;
           })
           .join('')}
@@ -558,8 +515,7 @@ async function viewShopping() {
 
   return `
     <h1 class="page-title">Liste de courses</h1>
-    <p class="page-sub">Semaine ${state.shopWeek} / 8 · prix moyens Lidl / Aldi / Premier Prix</p>
-    <div class="week-nav">${weeks}</div>
+    <p class="page-sub">Semaine type famille (4 pers.) · ajuste les quantités au quotidien via +/−</p>
     <div class="shop-total">
       <div>
         <div class="label">Total estimé</div>
@@ -575,395 +531,111 @@ async function viewShopping() {
 }
 
 function bindShopping() {
-  document.querySelectorAll('[data-week]').forEach((btn) => {
-    btn.onclick = () => {
-      state.shopWeek = Number(btn.dataset.week);
-      renderPage();
-    };
-  });
   document.querySelectorAll('[data-item]').forEach((btn) => {
     btn.onclick = async () => {
       const id = btn.dataset.item;
-      const checked = await getShoppingChecks(state.shopWeek);
-      checked[id] = !checked[id];
-      await saveShoppingChecks(state.shopWeek, checked);
-      renderPage();
-    };
-  });
-}
-
-/* ===== BATCH ===== */
-function viewBatch() {
-  const sunday = isSunday();
-  const totalPrep = BATCH_ITEMS.reduce((s, b) => s + b.timeMin, 0);
-  const totalSaved = BATCH_ITEMS.reduce((s, b) => s + b.savedMin, 0);
-
-  return `
-    <h1 class="page-title">Batch Cooking</h1>
-    <p class="page-sub">Préparez le dimanche · gagnez du temps toute la semaine</p>
-    ${
-      sunday
-        ? `<div class="sunday-banner"><h2>C'est dimanche !</h2><p>Session batch recommandée · ~${totalPrep} min · économie ~${totalSaved} min</p></div>`
-        : `<div class="surface" style="margin-bottom:1rem"><strong>Prochain batch :</strong> dimanche · ${totalPrep} min de prep · ${totalSaved} min gagnées</div>`
-    }
-    ${BATCH_ITEMS.map(
-      (b) => `
-      <article class="batch-card">
-        <h3>${b.name}</h3>
-        <p>${b.tips}</p>
-        <div class="batch-meta">
-          <span class="tag">${b.timeMin} min</span>
-          <span class="tag save">−${b.savedMin} min gagnés</span>
-          ${b.meals.map((m) => `<span class="tag">${m}</span>`).join('')}
-        </div>
-      </article>`
-    ).join('')}
-  `;
-}
-
-/* ===== AMISSE (famille) ===== */
-async function viewAmisse() {
-  const today = formatDateISO();
-  const baseDayPlan = getAmisseDayPlan(new Date());
-  const daily = await getOrCreateDaily(today, 'amisse:');
-  const people = clampPeople(daily.people);
-  const dayPlan = scalePlan(baseDayPlan, people, AMISSE_BASE_COEFF);
-  const totals = amisseDayTotals(dayPlan);
-  const left = remainingMeals(daily.mealsDone);
-  const shopTotal = estimateListTotal(AMISSE_SHOPPING_WEEK);
-
-  const tabs = `
-    <div class="day-nav">
-      <button class="chip ${state.amisseTab === 'today' ? 'active' : ''}" data-amisse="today">Aujourd'hui</button>
-      <button class="chip ${state.amisseTab === 'week' ? 'active' : ''}" data-amisse="week">Calendrier</button>
-      <button class="chip ${state.amisseTab === 'cheeses' ? 'active' : ''}" data-amisse="cheeses">Fromages</button>
-      <button class="chip ${state.amisseTab === 'shopping' ? 'active' : ''}" data-amisse="shopping">Courses</button>
-      <button class="chip ${state.amisseTab === 'batch' ? 'active' : ''}" data-amisse="batch">Batch</button>
-    </div>`;
-
-  let body = '';
-  if (state.amisseTab === 'today') {
-    body = `
-      <div class="hero-dash amisse-hero">
-        <div class="eyebrow">Famille Amisse · ${dayPlan.label}</div>
-        <h2>Manger sainement</h2>
-        <p>${peopleCount(people)} personne${peopleCount(people) > 1 ? 's' : ''} — ${left} repas restants</p>
-      </div>
-      ${renderPeoplePanel(people, today, 'amisse:', AMISSE_BASE_COEFF)}
-      <div class="section-label">Portions de référence (famille complète)</div>
-      <div class="surface" style="margin-bottom:1rem">
-        ${AMISSE_PORTIONS.map((p) => `<div style="display:flex;justify-content:space-between;gap:.75rem;margin-bottom:.35rem"><strong>${p.member}</strong><span style="color:var(--text-muted);font-size:.85rem;text-align:right">${p.hint}</span></div>`).join('')}
-      </div>
-      <div class="section-label">Menus du jour · ${totals.calories} kcal · ${totals.protein} g protéines · ×${dayPlan.factor.toFixed(2)}</div>
-      <div class="meal-list">
-        ${MEAL_TYPES.map((t) => renderMealCard(dayPlan[t.id], t, daily.mealsDone?.[t.id], today, 'amisse:')).join('')}
-      </div>
-      <div class="section-label">Principes</div>
-      <ul class="future-list surface" style="padding:0;margin-bottom:1rem">
-        ${AMISSE.principles.map((p) => `<li>${p}</li>`).join('')}
-      </ul>
-      <p class="page-sub">Seul ? Mets Adultes à 1 et Enfants à 0 — les quantités se recalculent.</p>
-    `;
-  } else if (state.amisseTab === 'week') {
-    const selected = state.amisseSelectedDate || today;
-    const selectedDaily = await getOrCreateDaily(selected, 'amisse:');
-    const selectedPeople = clampPeople(selectedDaily.people);
-    const selectedPlan = scalePlan(getAmisseDayPlan(parseISO(selected)), selectedPeople, AMISSE_BASE_COEFF);
-    const selectedTotals = amisseDayTotals(selectedPlan);
-    body = `
-      ${renderAmisseCalendar(today, selected)}
-      ${renderPeoplePanel(selectedPeople, selected, 'amisse:', AMISSE_BASE_COEFF)}
-      <div class="section-label">Programme de la semaine</div>
-      <div class="amisse-week-strip">
-        ${AMISSE_WEEK.map((d, idx) => {
-          const isToday = idx === getAmisseDayIndex(new Date());
-          const isSelected = idx === getAmisseDayIndex(parseISO(selected));
-          return `
-            <button type="button" class="amisse-week-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''}" data-amisse-weekday="${idx}">
-              <strong>${d.label.slice(0, 3)}</strong>
-              <span>${d.dinner.name.split('·')[0].trim().slice(0, 18)}</span>
-            </button>`;
-        }).join('')}
-      </div>
-      <div class="section-label" style="text-transform:capitalize">${formatFR(selected)} · ${selectedPlan.label}</div>
-      <p class="page-sub" style="margin-top:-.35rem">${selectedTotals.calories} kcal · ${selectedTotals.protein} g prot · ${peopleCount(selectedPeople)} pers. · ×${selectedPlan.factor.toFixed(2)}</p>
-      <div class="meal-list">
-        ${MEAL_TYPES.map((t) => renderMealCard(selectedPlan[t.id], t, selectedDaily.mealsDone?.[t.id], selected, 'amisse:')).join('')}
-      </div>
-      <div class="section-label">Récap semaine</div>
-      ${AMISSE_WEEK.map((d, idx) => {
-        const t = amisseDayTotals(d);
-        const isToday = idx === getAmisseDayIndex(new Date());
-        const isSelected = idx === getAmisseDayIndex(parseISO(selected));
-        return `
-          <button type="button" class="batch-card amisse-week-card ${isToday ? 'amisse-today' : ''} ${isSelected ? 'is-selected' : ''}" data-amisse-weekday="${idx}">
-            <h3>${d.label}${isToday ? ' · aujourd’hui' : ''}</h3>
-            <p>${d.breakfast.name} · ${d.lunch.name}<br>${d.snack.name} · ${d.dinner.name}</p>
-            <div class="batch-meta">
-              <span class="tag">${t.calories} kcal base famille</span>
-              <span class="tag">${t.protein} g prot</span>
-            </div>
-          </button>`;
-      }).join('')}
-    `;
-  } else if (state.amisseTab === 'cheeses') {
-    body = `
-      <div class="hero-dash amisse-hero">
-        <div class="eyebrow">Top 10 · moins caloriques</div>
-        <h2>Fromages légers</h2>
-        <p>Plus d’eau = moins de kcal · portions famille & sport recalculées</p>
-      </div>
-      <ul class="future-list surface" style="padding:0;margin-bottom:1rem">
-        ${CHEESE_RULES.map((r) => `<li>${r}</li>`).join('')}
-      </ul>
-      ${CHEESES.map((c) => {
-        const p = cheesePortions(c);
-        return `
-          <article class="batch-card cheese-card">
-            <h3>#${c.rank} · ${c.name}</h3>
-            <p>${c.tip}</p>
-            <div class="batch-meta">
-              <span class="tag">${c.kcal100} kcal/100g</span>
-              <span class="tag">${c.fat100} g lip/100g</span>
-            </div>
-            <div class="cheese-grid">
-              <div><strong>Sport (indiv.)</strong><span>${p.individual.grams} g · ${p.individual.calories} kcal · P ${p.individual.protein} g</span></div>
-              <div><strong>Famille</strong><span>${p.family.grams} g · ${p.family.calories} kcal</span></div>
-              <div><strong>Adulte</strong><span>${p.adult.grams} g · ${p.adult.calories} kcal</span></div>
-              <div><strong>Enfant 10 ans</strong><span>${p.child10.grams} g · ${p.child10.calories} kcal</span></div>
-              <div><strong>Enfant 4 ans</strong><span>${p.child4.grams} g · ${p.child4.calories} kcal</span></div>
-            </div>
-          </article>`;
-      }).join('')}
-    `;
-  } else if (state.amisseTab === 'shopping') {
-    const checked = await getShoppingChecks('family', 'amisse');
-    const checkedTotal = AMISSE_SHOPPING_WEEK.filter((i) => checked[i.id]).reduce(
-      (s, i) => s + estimateItemPrice(i),
-      0
-    );
-    const byCat = {};
-    AMISSE_SHOPPING_WEEK.forEach((item) => {
-      if (!byCat[item.cat]) byCat[item.cat] = [];
-      byCat[item.cat].push(item);
-    });
-    let catsHtml = '';
-    CATEGORIES.forEach((cat) => {
-      const items = byCat[cat.id];
-      if (!items?.length) return;
-      catsHtml += `
-        <div class="cat-block">
-          <div class="cat-title">${cat.label}</div>
-          ${items
-            .map((item) => {
-              const isChecked = !!checked[item.id];
-              return `
-              <button class="shop-item ${isChecked ? 'checked' : ''}" data-amisse-item="${item.id}" type="button">
-                <span class="checkbox">${isChecked ? ICONS.check : ''}</span>
-                <span class="item-info">
-                  <span class="item-name">${item.name}</span>
-                  <span class="item-qty">${item.qty} ${item.unit}</span>
-                </span>
-                <span class="item-price">${euro(estimateItemPrice(item))}</span>
-              </button>`;
-            })
-            .join('')}
-        </div>`;
-    });
-    body = `
-      <p class="page-sub">Courses semaine famille Amisse · Lidl / Aldi / Premier Prix</p>
-      <div class="shop-total">
-        <div>
-          <div class="label">Total estimé / semaine</div>
-          <div class="amount">${euro(shopTotal)}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="label">Coché</div>
-          <div style="font-family:var(--font-display);font-weight:700">${euro(checkedTotal)}</div>
-        </div>
-      </div>
-      ${catsHtml}
-    `;
-  } else {
-    body = `
-      <div class="sunday-banner" style="background:linear-gradient(135deg,var(--teal),var(--cyan))">
-        <h2>Batch famille Amisse</h2>
-        <p>Dimanche · repas sains pour 4 · mêmes bases que le plan nutritionnel</p>
-      </div>
-      ${AMISSE_BATCH.map(
-        (b) => `
-        <article class="batch-card">
-          <h3>${b.name}</h3>
-          <p>${b.tips}</p>
-          <div class="batch-meta">
-            <span class="tag">${b.timeMin} min</span>
-            <span class="tag save">−${b.savedMin} min</span>
-          </div>
-        </article>`
-      ).join('')}
-    `;
-  }
-
-  return `
-    <h1 class="page-title">Amisse</h1>
-    <p class="page-sub">Famille · alimentation saine · indépendant du programme sport</p>
-    ${tabs}
-    ${body}
-  `;
-}
-
-function bindAmisse() {
-  bindPeoplePanel();
-  document.querySelectorAll('[data-amisse]').forEach((btn) => {
-    btn.onclick = () => {
-      state.amisseTab = btn.dataset.amisse;
-      if (btn.dataset.amisse === 'week' && !state.amisseSelectedDate) {
-        state.amisseSelectedDate = formatDateISO();
-      }
-      renderPage();
-    };
-  });
-  document.querySelectorAll('[data-amisse-cal]').forEach((btn) => {
-    btn.onclick = () => {
-      state.amisseSelectedDate = btn.dataset.amisseCal;
-      state.amisseTab = 'week';
-      renderPage();
-    };
-  });
-  document.querySelectorAll('[data-amisse-weekday]').forEach((btn) => {
-    btn.onclick = () => {
-      const idx = Number(btn.dataset.amisseWeekday);
-      const ref = state.amisseSelectedDate || formatDateISO();
-      const refIdx = getAmisseDayIndex(parseISO(ref));
-      state.amisseSelectedDate = addDays(ref, idx - refIdx);
-      state.amisseTab = 'week';
-      renderPage();
-    };
-  });
-  document.querySelectorAll('[data-amisse-item]').forEach((btn) => {
-    btn.onclick = async () => {
-      const id = btn.dataset.amisseItem;
       const checked = await getShoppingChecks('family', 'amisse');
       checked[id] = !checked[id];
       await saveShoppingChecks('family', checked, 'amisse');
       renderPage();
     };
   });
-  bindMealCards();
 }
 
-function renderAmisseCalendar(todayISO, selectedISO) {
-  const base = parseISO(selectedISO || todayISO);
-  const year = base.getFullYear();
-  const month = base.getMonth();
-  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthName = new Date(year, month, 1).toLocaleDateString('fr-FR', {
-    month: 'long',
-    year: 'numeric',
-  });
-  const labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-
-  let cells = labels.map((d) => `<div class="cal-head">${d}</div>`).join('');
-  for (let i = 0; i < firstDow; i++) cells += `<div class="cal-day empty"></div>`;
-  for (let d = 1; d <= daysInMonth; d++) {
-    const iso = formatDateISO(new Date(year, month, d));
-    const plan = getAmisseDayPlan(new Date(year, month, d));
-    const short = plan.label.slice(0, 3);
-    const isToday = iso === todayISO;
-    const selected = iso === selectedISO;
-    cells += `
-      <button class="cal-day amisse-cal ${isToday ? 'today' : ''} ${selected ? 'selected' : ''}" data-amisse-cal="${iso}" type="button">
-        <span class="cal-num">${d}</span>
-        <span class="phase">${short}</span>
-      </button>`;
-  }
-
+/* ===== FROMAGES ===== */
+function viewCheeses() {
   return `
-    <div class="section-label" style="text-transform:capitalize">${monthName}</div>
-    <div class="cal-grid amisse-cal-grid">${cells}</div>
-    <p class="page-sub" style="margin-top:.85rem">Touchez un jour : le programme Amisse suit le jour de la semaine (Lun→Dim, en boucle).</p>
+    <h1 class="page-title">Fromages légers</h1>
+    <p class="page-sub">Top 10 · portions famille & individuel</p>
+    <ul class="future-list surface" style="padding:0;margin-bottom:1rem">
+      ${CHEESE_RULES.map((r) => `<li>${r}</li>`).join('')}
+    </ul>
+    ${CHEESES.map((c) => {
+      const p = cheesePortions(c);
+      return `
+        <article class="batch-card cheese-card">
+          <h3>#${c.rank} · ${c.name}</h3>
+          <p>${c.tip}</p>
+          <div class="batch-meta">
+            <span class="tag">${c.kcal100} kcal/100g</span>
+            <span class="tag">${c.fat100} g lip/100g</span>
+          </div>
+          <div class="cheese-grid">
+            <div><strong>1 adulte</strong><span>${p.individual.grams} g · ${p.individual.calories} kcal</span></div>
+            <div><strong>Famille (4)</strong><span>${p.family.grams} g · ${p.family.calories} kcal</span></div>
+            <div><strong>Part adulte</strong><span>${p.adult.grams} g · ${p.adult.calories} kcal</span></div>
+            <div><strong>Enfant 10 ans</strong><span>${p.child10.grams} g · ${p.child10.calories} kcal</span></div>
+            <div><strong>Enfant 4 ans</strong><span>${p.child4.grams} g · ${p.child4.calories} kcal</span></div>
+          </div>
+        </article>`;
+    }).join('')}
+  `;
+}
+
+/* ===== BATCH ===== */
+function viewBatch() {
+  const sunday = isSunday();
+  const totalPrep = AMISSE_BATCH.reduce((s, b) => s + b.timeMin, 0);
+  const totalSaved = AMISSE_BATCH.reduce((s, b) => s + b.savedMin, 0);
+  return `
+    <h1 class="page-title">Batch Cooking</h1>
+    <p class="page-sub">Préparez le dimanche · quantités à adapter avec +/− du jour</p>
+    ${
+      sunday
+        ? `<div class="sunday-banner"><h2>C'est dimanche !</h2><p>~${totalPrep} min · économie ~${totalSaved} min</p></div>`
+        : `<div class="surface" style="margin-bottom:1rem"><strong>Prochain batch :</strong> dimanche · ${totalPrep} min</div>`
+    }
+    ${AMISSE_BATCH.map(
+      (b) => `
+      <article class="batch-card">
+        <h3>${b.name}</h3>
+        <p>${b.tips}</p>
+        <div class="batch-meta">
+          <span class="tag">${b.timeMin} min</span>
+          <span class="tag save">−${b.savedMin} min</span>
+        </div>
+      </article>`
+    ).join('')}
   `;
 }
 
 /* ===== SETTINGS ===== */
 async function viewSettings() {
-  const budget = estimateCycleBudget();
-  const startFR = formatFR(formatDateISO(new Date(state.cycleStart)));
-
+  const budget = familyBudget();
   return `
     <h1 class="page-title">Réglages</h1>
-    <p class="page-sub">Sport (sèche/masse) et famille Amisse · données 100 % locales</p>
-
-    <div class="section-label">Objectif</div>
-    <div class="setting-row">
-      <div class="info"><strong>Nutrition</strong><span>Sèche ou prise de masse</span></div>
-      <div class="segment" id="goal-seg">
-        <button data-goal="seche" class="${state.goal === 'seche' ? 'active' : ''}">Sèche</button>
-        <button data-goal="masse" class="${state.goal === 'masse' ? 'active' : ''}">Masse</button>
-      </div>
-    </div>
+    <p class="page-sub">Programme famille · données 100 % locales</p>
 
     <div class="setting-row">
       <div class="info"><strong>Thème</strong><span>Clair / sombre</span></div>
       <button class="switch ${state.theme === 'dark' ? 'on' : ''}" id="theme-switch" aria-label="Thème sombre"></button>
     </div>
 
-    <div class="section-label">Cycle</div>
-    <div class="setting-row">
-      <div class="info"><strong>Début du cycle</strong><span style="text-transform:capitalize">${startFR}</span></div>
-      <button class="btn btn-ghost" id="reset-cycle" style="min-height:40px;padding:.4rem .8rem">Reprendre aujourd'hui</button>
-    </div>
-
-    <div class="section-label">Budget estimé</div>
+    <div class="section-label">Budget courses (liste type 4 pers.)</div>
     <div class="surface" style="margin-bottom:1rem">
       <div style="display:flex;justify-content:space-between;margin-bottom:.45rem"><span>Semaine</span><strong>${euro(budget.week)}</strong></div>
       <div style="display:flex;justify-content:space-between;margin-bottom:.45rem"><span>Mois</span><strong>${euro(budget.month)}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span>60 jours</span><strong style="color:var(--orange)">${euro(budget.days60)}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>≈ 60 jours</span><strong style="color:var(--orange)">${euro(budget.days60)}</strong></div>
     </div>
 
-    <div class="section-label">Application (PWA)</div>
+    <div class="section-label">Effectif par défaut</div>
     <div class="surface" style="margin-bottom:1rem">
-      <div class="pwa-status" style="margin-bottom:.75rem">
-        <span class="pwa-dot ${isStandalone() ? 'on' : ''}"></span>
-        <span>${pwaStatusLabel()}</span>
-      </div>
-      ${
-        canInstall()
-          ? `<button class="btn btn-accent btn-block" id="settings-install">Installer sur cet appareil</button>`
-          : isIOS() && !isStandalone()
-            ? `<p class="page-sub" style="margin:0">iPhone : Safari → Partager → <strong>Sur l’écran d’accueil</strong></p>`
-            : isStandalone()
-              ? `<p class="page-sub" style="margin:0">Application installée · mode hors ligne actif</p>`
-              : `<p class="page-sub" style="margin:0">Ouvre l’app en HTTPS ou localhost pour pouvoir l’installer.</p>`
-      }
+      <p class="page-sub" style="margin:0">Chaque jour mémorise son propre effectif (+/−). Défaut : 2 adultes, 1 enfant 10 ans, 1 enfant 4 ans.</p>
     </div>
 
     <div class="section-label">Données</div>
     <button class="btn btn-orange btn-block" id="reset-all">Réinitialiser toutes les données</button>
 
-    <div class="section-label">Évolutions futures</div>
+    <div class="section-label">Principes</div>
     <ul class="future-list surface" style="padding:0">
-      <li>Export PDF / Excel</li>
-      <li>Synchronisation cloud</li>
-      <li>Connexion GoodCoach</li>
-      <li>Notifications repas</li>
-      <li>Scanner code-barres · Open Food Facts</li>
+      ${AMISSE.principles.map((p) => `<li>${p}</li>`).join('')}
     </ul>
 
-    <p class="page-sub" style="margin-top:1.5rem;text-align:center">Meal Planner · Halal · Offline · PWA</p>
+    <p class="page-sub" style="margin-top:1.5rem;text-align:center">Meal Planner · Famille · Offline · PWA</p>
   `;
 }
 
 function bindSettings() {
-  document.querySelectorAll('[data-goal]').forEach((btn) => {
-    btn.onclick = async () => {
-      state.goal = btn.dataset.goal;
-      await setSetting('goal', state.goal);
-      toast(state.goal === 'seche' ? 'Objectif : sèche' : 'Objectif : prise de masse');
-      renderPage();
-    };
-  });
   document.getElementById('theme-switch')?.addEventListener('click', async () => {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
     await setSetting('theme', state.theme);
@@ -971,25 +643,10 @@ function bindSettings() {
     renderShell();
     renderPage();
   });
-  document.getElementById('reset-cycle')?.addEventListener('click', async () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    state.cycleStart = today.toISOString();
-    await setSetting('cycleStart', state.cycleStart);
-    toast('Cycle redémarré au jour 1');
-    renderPage();
-  });
-  document.getElementById('settings-install')?.addEventListener('click', () => triggerInstall());
   document.getElementById('reset-all')?.addEventListener('click', async () => {
     if (!confirm('Effacer toutes les données locales ?')) return;
     await resetAllData();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    await setSetting('cycleStart', today.toISOString());
-    await setSetting('goal', 'seche');
     await setSetting('theme', 'dark');
-    state.cycleStart = today.toISOString();
-    state.goal = 'seche';
     state.theme = 'dark';
     applyTheme();
     toast('Données réinitialisées');
@@ -1013,13 +670,6 @@ function isIOS() {
 
 function canInstall() {
   return !!deferredInstallPrompt;
-}
-
-function pwaStatusLabel() {
-  if (isStandalone()) return 'Installée (standalone)';
-  if (canInstall()) return 'Prête à installer';
-  if (isIOS()) return 'iOS · ajout via Safari';
-  return 'Navigateur · PWA détectée';
 }
 
 function showInstallBanner() {
@@ -1046,7 +696,6 @@ async function triggerInstall() {
   deferredInstallPrompt = null;
   document.getElementById('install-banner').hidden = true;
   toast(outcome === 'accepted' ? 'Application installée ✓' : 'Installation annulée');
-  if (state.route === 'settings') renderPage();
 }
 
 function setupPwa() {
@@ -1054,22 +703,18 @@ function setupPwa() {
     e.preventDefault();
     deferredInstallPrompt = e;
     showInstallBanner();
-    if (state.route === 'settings') renderPage();
   });
-
   window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
     const banner = document.getElementById('install-banner');
     if (banner) banner.hidden = true;
     toast('Meal Planner installé ✓');
   });
-
   document.getElementById('install-btn')?.addEventListener('click', () => triggerInstall());
   document.getElementById('install-dismiss')?.addEventListener('click', () => {
     sessionStorage.setItem('mp_install_dismissed', '1');
     document.getElementById('install-banner').hidden = true;
   });
-
   if (isIOS() && !isStandalone()) showInstallBanner();
 }
 
@@ -1078,23 +723,15 @@ async function registerSW() {
   try {
     const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
     await reg.update();
-
-    const askReload = (worker) => {
-      worker.postMessage('SKIP_WAITING');
-    };
-
+    const askReload = (worker) => worker.postMessage('SKIP_WAITING');
     if (reg.waiting) askReload(reg.waiting);
-
     reg.addEventListener('updatefound', () => {
       const worker = reg.installing;
       if (!worker) return;
       worker.addEventListener('statechange', () => {
-        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-          askReload(worker);
-        }
+        if (worker.state === 'installed' && navigator.serviceWorker.controller) askReload(worker);
       });
     });
-
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (refreshing) return;
@@ -1107,13 +744,9 @@ async function registerSW() {
   }
 }
 
-/* ---------- Boot ---------- */
 async function boot() {
   await initDB();
-  state.cycleStart = await getSetting('cycleStart');
-  state.goal = (await getSetting('goal')) || 'seche';
   state.theme = (await getSetting('theme')) || 'dark';
-  state.shopWeek = Math.min(8, getCycleWeek(getCycleDay(state.cycleStart)));
   applyTheme();
   renderShell();
   await renderPage();
