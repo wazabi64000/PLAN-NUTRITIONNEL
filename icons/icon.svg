@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Meal Planner">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#079AA9"/>
+      <stop offset="100%" stop-color="#00BCD4"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M160 340c80 0 160-70 160-170-90 0-160 70-160 170z" fill="#D2EE6B"/>
+  <path d="M160 340c30-70 90-120 160-130" fill="none" stroke="#FCE006" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="350" cy="160" r="28" fill="#F29D06"/>
+</svg>
