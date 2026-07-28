@@ -61,8 +61,8 @@ export const MENU_A = [
       { name: 'Épinards', qty: 200, unit: 'g', cat: 'legumes' },
       { name: 'Huile d\'olive', qty: 5, unit: 'ml', cat: 'graisses' },
     ], 25, { kcal: 500, p: 48, f: 9, c: 52 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 120, p: 4, f: 10, c: 2 }),
     dinner: meal('Omelette + salade', [
       { name: 'Œufs', qty: 3, unit: 'unités', cat: 'oeufs' },
@@ -85,8 +85,8 @@ export const MENU_A = [
     snack: meal('Fromage blanc 0 %', [
       { name: 'Fromage blanc 0 %', qty: 200, unit: 'g', cat: 'laitiers' },
     ], 1, { kcal: 100, p: 16, f: 0, c: 8 }),
-    dinner: meal('Sardines + salade', [
-      { name: 'Sardines (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
+    dinner: meal('Maquereau + salade', [
+      { name: 'Maquereau (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
       { name: 'Salade', qty: 120, unit: 'g', cat: 'legumes' },
       { name: 'Tomates', qty: 100, unit: 'g', cat: 'legumes' },
     ], 8, { kcal: 280, p: 24, f: 16, c: 6 }),
@@ -144,8 +144,8 @@ export const MENU_A = [
       { name: 'Pomme de terre', qty: 250, unit: 'g', cat: 'feculents' },
       { name: 'Haricots verts', qty: 150, unit: 'g', cat: 'legumes' },
     ], 30, { kcal: 490, p: 46, f: 5, c: 58 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 120, p: 4, f: 10, c: 2 }),
     dinner: meal('Omelette + haricots verts', [
       { name: 'Œufs', qty: 3, unit: 'unités', cat: 'oeufs' },
@@ -187,8 +187,8 @@ export const MENU_A = [
     snack: meal('Orange', [
       { name: 'Orange', qty: 1, unit: 'unité', cat: 'fruits' },
     ], 1, { kcal: 60, p: 1, f: 0, c: 15 }),
-    dinner: meal('Sardines + légumes', [
-      { name: 'Sardines (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
+    dinner: meal('Maquereau + légumes', [
+      { name: 'Maquereau (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
       { name: 'Courgettes', qty: 150, unit: 'g', cat: 'legumes' },
       { name: 'Tomates', qty: 100, unit: 'g', cat: 'legumes' },
     ], 12, { kcal: 320, p: 26, f: 20, c: 8 }),
@@ -223,8 +223,8 @@ export const MENU_A = [
       { name: 'Lentilles', qty: 80, unit: 'g', cat: 'feculents' },
       { name: 'Carottes', qty: 100, unit: 'g', cat: 'legumes' },
     ], 30, { kcal: 500, p: 40, f: 10, c: 50 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 120, p: 4, f: 10, c: 2 }),
     dinner: meal('Thon + courgettes', [
       { name: 'Thon (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
@@ -265,8 +265,8 @@ export const MENU_A = [
     snack: meal('Banane', [
       { name: 'Banane', qty: 1, unit: 'unité', cat: 'fruits' },
     ], 1, { kcal: 90, p: 1, f: 0, c: 23 }),
-    dinner: meal('Sardines + haricots verts', [
-      { name: 'Sardines (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
+    dinner: meal('Thon + haricots verts', [
+      { name: 'Thon (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
       { name: 'Haricots verts', qty: 200, unit: 'g', cat: 'legumes' },
     ], 12, { kcal: 290, p: 26, f: 16, c: 10 }),
   },
@@ -320,8 +320,8 @@ export const MENU_A = [
       { name: 'Lentilles', qty: 80, unit: 'g', cat: 'feculents' },
       { name: 'Haricots verts', qty: 200, unit: 'g', cat: 'legumes' },
     ], 30, { kcal: 500, p: 50, f: 6, c: 48 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 120, p: 4, f: 10, c: 2 }),
     dinner: meal('Thon + salade', [
       { name: 'Thon (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
@@ -345,8 +345,8 @@ export const MENU_B = [
       { name: 'Pomme de terre', qty: 200, unit: 'g', cat: 'feculents' },
       { name: 'Courgettes', qty: 200, unit: 'g', cat: 'legumes' },
     ], 30, { kcal: 460, p: 46, f: 5, c: 50 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 130, p: 3, f: 13, c: 2 }),
     dinner: meal('Colin + riz + épinards', [
       { name: 'Colin', qty: 180, unit: 'g', cat: 'poissons' },
@@ -368,8 +368,8 @@ export const MENU_B = [
     snack: meal('Fromage blanc 0 %', [
       { name: 'Fromage blanc 0 %', qty: 200, unit: 'g', cat: 'laitiers' },
     ], 1, { kcal: 100, p: 16, f: 0, c: 8 }),
-    dinner: meal('Sardines + salade + tomates', [
-      { name: 'Sardines (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
+    dinner: meal('Maquereau + salade + tomates', [
+      { name: 'Maquereau (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
       { name: 'Salade', qty: 120, unit: 'g', cat: 'legumes' },
       { name: 'Tomates', qty: 100, unit: 'g', cat: 'legumes' },
     ], 8, { kcal: 280, p: 24, f: 16, c: 6 }),
@@ -404,8 +404,8 @@ export const MENU_B = [
       { name: 'Lentilles', qty: 80, unit: 'g', cat: 'feculents' },
       { name: 'Épinards', qty: 200, unit: 'g', cat: 'legumes' },
     ], 30, { kcal: 490, p: 50, f: 6, c: 45 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 120, p: 4, f: 10, c: 2 }),
     dinner: meal('Omelette + haricots verts', [
       { name: 'Œufs', qty: 3, unit: 'unités', cat: 'oeufs' },
@@ -426,8 +426,8 @@ export const MENU_B = [
     snack: meal('Orange', [
       { name: 'Orange', qty: 1, unit: 'unité', cat: 'fruits' },
     ], 1, { kcal: 60, p: 1, f: 0, c: 15 }),
-    dinner: meal('Sardines + salade', [
-      { name: 'Sardines (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
+    dinner: meal('Maquereau + salade', [
+      { name: 'Maquereau (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
       { name: 'Salade', qty: 120, unit: 'g', cat: 'legumes' },
       { name: 'Huile d\'olive', qty: 5, unit: 'ml', cat: 'graisses' },
     ], 8, { kcal: 310, p: 26, f: 22, c: 4 }),
@@ -484,12 +484,12 @@ export const MENU_B = [
       { name: 'Riz basmati', qty: 80, unit: 'g', cat: 'feculents' },
       { name: 'Épinards', qty: 200, unit: 'g', cat: 'legumes' },
     ], 25, { kcal: 480, p: 48, f: 6, c: 52 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 130, p: 3, f: 13, c: 2 }),
-    dinner: meal('Sardines + courgettes', [
-      { name: 'Sardines (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
-      { name: 'Courgettes', qty: 250, unit: 'g', cat: 'legumes' },
+    dinner: meal('Thon + épinards', [
+      { name: 'Thon (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
+      { name: 'Épinards', qty: 200, unit: 'g', cat: 'legumes' },
     ], 12, { kcal: 280, p: 24, f: 16, c: 8 }),
   },
   {
@@ -522,8 +522,8 @@ export const MENU_B = [
       { name: 'Riz basmati', qty: 80, unit: 'g', cat: 'feculents' },
       { name: 'Haricots verts', qty: 200, unit: 'g', cat: 'legumes' },
     ], 25, { kcal: 500, p: 48, f: 6, c: 55 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 120, p: 4, f: 10, c: 2 }),
     dinner: meal('Omelette + tomates', [
       { name: 'Œufs', qty: 3, unit: 'unités', cat: 'oeufs' },
@@ -544,8 +544,8 @@ export const MENU_B = [
     snack: meal('Orange', [
       { name: 'Orange', qty: 1, unit: 'unité', cat: 'fruits' },
     ], 1, { kcal: 60, p: 1, f: 0, c: 15 }),
-    dinner: meal('Sardines + légumes', [
-      { name: 'Sardines (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
+    dinner: meal('Maquereau + légumes', [
+      { name: 'Maquereau (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
       { name: 'Courgettes', qty: 150, unit: 'g', cat: 'legumes' },
       { name: 'Tomates', qty: 100, unit: 'g', cat: 'legumes' },
     ], 12, { kcal: 320, p: 26, f: 20, c: 8 }),
@@ -600,8 +600,8 @@ export const MENU_B = [
       { name: 'Pomme de terre', qty: 200, unit: 'g', cat: 'feculents' },
       { name: 'Épinards', qty: 200, unit: 'g', cat: 'legumes' },
     ], 30, { kcal: 460, p: 46, f: 5, c: 50 }),
-    snack: meal('Graines de tournesol', [
-      { name: 'Graines de tournesol', qty: 20, unit: 'g', cat: 'graisses' },
+    snack: meal('Amandes', [
+      { name: 'Amandes', qty: 20, unit: 'g', cat: 'graisses' },
     ], 1, { kcal: 120, p: 4, f: 10, c: 2 }),
     dinner: meal('Omelette + salade', [
       { name: 'Œufs', qty: 3, unit: 'unités', cat: 'oeufs' },

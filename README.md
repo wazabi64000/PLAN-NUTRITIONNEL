@@ -39,7 +39,7 @@ Ouvrir [http://localhost:5173](http://localhost:5173).
 
 ### Installation PWA
 
-L’app est installable (manifest + service worker `v3` + icônes maskable).
+L’app est installable (manifest + service worker `v4` + icônes maskable).
 
 - **Android / Chrome / Edge** : bannière « Installer » ou menu → Installer l’application
 - **iPhone / iPad** : Safari → Partager → Sur l’écran d’accueil

@@ -1,5 +1,5 @@
 /* Meal Planner — Service Worker Offline First */
-const CACHE = 'meal-planner-v3';
+const CACHE = 'meal-planner-v4';
 const ASSETS = [
   './',
   './index.html',

@@ -717,15 +717,31 @@ function setupPwa() {
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   try {
-    const reg = await navigator.serviceWorker.register('./sw.js');
+    const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+    await reg.update();
+
+    const askReload = (worker) => {
+      worker.postMessage('SKIP_WAITING');
+    };
+
+    if (reg.waiting) askReload(reg.waiting);
+
     reg.addEventListener('updatefound', () => {
       const worker = reg.installing;
       if (!worker) return;
       worker.addEventListener('statechange', () => {
         if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-          toast('Mise à jour disponible — recharge');
+          askReload(worker);
         }
       });
+    });
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      toast('Mise à jour PWA appliquée');
+      setTimeout(() => window.location.reload(), 400);
     });
   } catch (e) {
     console.warn('SW non enregistré', e);
