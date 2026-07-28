@@ -134,12 +134,7 @@ export async function resetAllData() {
 
 export async function initDB() {
   await openDB();
-  // Ensure cycle start date
-  const start = await getSetting('cycleStart');
-  if (!start) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    await setSetting('cycleStart', today.toISOString());
-  }
+  // Ensure cycle start date = 1er août 2026
+  await setSetting('cycleStart', new Date(2026, 7, 1).toISOString());
   if ((await getSetting('theme')) === null) await setSetting('theme', 'dark');
 }

@@ -21,6 +21,7 @@ export const AMISSE = {
     'Fromages légers prioritaires (top 10 kcal)',
     'Batch cooking le dimanche',
     'Effectif ajustable chaque jour (+/− adulte / enfant)',
+    'Démarrage : 1er août 2026 (Jour 1 = Lundi)',
   ],
 };
 
@@ -32,6 +33,31 @@ export const PORTION_CHILD4 = 0.5;
 export const AMISSE_BASE_COEFF = 2 * PORTION_ADULT + PORTION_CHILD10 + PORTION_CHILD4; // 3.25
 
 export const DEFAULT_AMISSE_PEOPLE = { adults: 2, child10: 1, child4: 1 };
+
+/** Début officiel du programme (Jour 1 = Lundi du cycle) */
+export const PROGRAM_START_ISO = '2026-08-01';
+
+function startOfLocalDay(date) {
+  const d = date instanceof Date ? new Date(date) : new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+export function daysSinceProgramStart(date = new Date()) {
+  const start = startOfLocalDay(new Date(2026, 7, 1)); // 1er août 2026
+  const day = startOfLocalDay(date);
+  return Math.round((day - start) / 86400000);
+}
+
+export function isProgramStarted(date = new Date()) {
+  return daysSinceProgramStart(date) >= 0;
+}
+
+export function programDayNumber(date = new Date()) {
+  const days = daysSinceProgramStart(date);
+  if (days < 0) return null;
+  return days + 1;
+}
 
 export function peopleCoeff(people = DEFAULT_AMISSE_PEOPLE) {
   const a = Math.max(0, Number(people.adults) || 0);
@@ -383,9 +409,9 @@ export const AMISSE_BATCH = [
 ];
 
 export function getAmisseDayIndex(date = new Date()) {
-  // Lundi = 0 … Dimanche = 6
-  const js = date.getDay();
-  return js === 0 ? 6 : js - 1;
+  // Jour 1 du programme (1er août 2026) = Lundi (index 0), puis boucle 7 jours
+  const days = daysSinceProgramStart(date);
+  return ((days % 7) + 7) % 7;
 }
 
 export function getAmisseDayPlan(date = new Date()) {

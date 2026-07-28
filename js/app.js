@@ -43,6 +43,10 @@ import {
   peopleCount,
   clampPeople,
   DEFAULT_AMISSE_PEOPLE,
+  PROGRAM_START_ISO,
+  isProgramStarted,
+  programDayNumber,
+  daysSinceProgramStart,
 } from './data/amisse.js';
 import { CHEESES, CHEESE_RULES, cheesePortions } from './data/cheeses.js';
 
@@ -297,6 +301,29 @@ function bindMealCards() {
 }
 
 /* ===== ACCUEIL ===== */
+function renderProgramBanner(date = new Date()) {
+  const started = isProgramStarted(date);
+  const dayNum = programDayNumber(date);
+  const startLabel = parseISO(PROGRAM_START_ISO).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  if (!started) {
+    const left = Math.abs(daysSinceProgramStart(date));
+    return `
+      <div class="surface" style="margin-bottom:1rem;border-left:3px solid var(--accent)">
+        <strong>Programme à partir du ${startLabel}</strong>
+        <p class="page-sub" style="margin:0.35rem 0 0">Encore ${left} jour${left > 1 ? 's' : ''} · Jour 1 = Lundi du cycle</p>
+      </div>`;
+  }
+  return `
+    <div class="surface" style="margin-bottom:1rem;border-left:3px solid var(--lime, var(--accent))">
+      <strong>Programme en cours · Jour ${dayNum}</strong>
+      <p class="page-sub" style="margin:0.35rem 0 0">Démarré le ${startLabel} · cycle 7 jours en boucle</p>
+    </div>`;
+}
+
 async function viewDashboard() {
   const today = formatDateISO();
   const daily = await getOrCreateDaily(today, PREFIX);
@@ -306,13 +333,16 @@ async function viewDashboard() {
   const left = remainingMeals(daily.mealsDone);
   const budget = familyBudget();
   const waterPct = Math.min(100, Math.round((daily.waterMl / WATER_TARGET_ML) * 100));
+  const dayNum = programDayNumber(new Date());
 
   return `
     <div class="hero-dash amisse-hero">
-      <div class="eyebrow">${AMISSE.name} · ${plan.label}</div>
+      <div class="eyebrow">${AMISSE.name} · ${plan.label}${dayNum ? ` · Jour ${dayNum}` : ''}</div>
       <h2>Famille adaptable</h2>
       <p>${peopleCount(people)} personne${peopleCount(people) > 1 ? 's' : ''} · ${left} repas restants</p>
     </div>
+
+    ${renderProgramBanner(new Date())}
 
     ${renderPeoplePanel(people, today)}
 
@@ -350,7 +380,7 @@ async function viewDashboard() {
       </div>
     </div>
 
-    <div class="section-label">Aujourd'hui · ${totals.calories} kcal · ${totals.protein} g protéines</div>
+    <div class="section-label">${isProgramStarted() ? 'Aujourd\'hui' : 'Aperçu'} · ${totals.calories} kcal · ${totals.protein} g protéines</div>
     <div class="meal-list">
       ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], today)).join('')}
     </div>
@@ -388,12 +418,13 @@ async function viewPlanning() {
 
   return `
     <h1 class="page-title">Planning</h1>
-    <p class="page-sub">Programme semaine · adaptable au nombre de personnes</p>
+    <p class="page-sub">Débute le 1er août 2026 · Lun→Dim en boucle</p>
+    ${renderProgramBanner(parseISO(selected))}
     ${renderCalendar(today, selected)}
     ${renderPeoplePanel(people, selected)}
     <div class="amisse-week-strip">
       ${AMISSE_WEEK.map((d, idx) => {
-        const isToday = idx === getAmisseDayIndex(new Date());
+        const isToday = isProgramStarted() && idx === getAmisseDayIndex(new Date());
         const isSelected = idx === getAmisseDayIndex(parseISO(selected));
         return `
           <button type="button" class="amisse-week-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''}" data-weekday="${idx}">
@@ -402,7 +433,7 @@ async function viewPlanning() {
           </button>`;
       }).join('')}
     </div>
-    <div class="section-label" style="text-transform:capitalize">${formatFR(selected)} · ${plan.label}</div>
+    <div class="section-label" style="text-transform:capitalize">${formatFR(selected)} · ${plan.label}${programDayNumber(parseISO(selected)) ? ` · Jour ${programDayNumber(parseISO(selected))}` : ''}</div>
     <p class="page-sub" style="margin-top:-.35rem">${totals.calories} kcal · ${totals.protein} g prot · ${peopleCount(people)} pers. · ×${plan.factor.toFixed(2)}</p>
     <div class="meal-list">
       ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], selected)).join('')}
@@ -410,7 +441,7 @@ async function viewPlanning() {
     <div class="section-label">Récap semaine (base 4 pers.)</div>
     ${AMISSE_WEEK.map((d, idx) => {
       const t = amisseDayTotals(d);
-      const isToday = idx === getAmisseDayIndex(new Date());
+      const isToday = isProgramStarted() && idx === getAmisseDayIndex(new Date());
       const isSelected = idx === getAmisseDayIndex(parseISO(selected));
       return `
         <button type="button" class="batch-card ${isToday ? 'amisse-today' : ''} ${isSelected ? 'is-selected' : ''}" data-weekday="${idx}">
@@ -453,7 +484,7 @@ function renderCalendar(todayISO, selectedISO) {
   return `
     <div class="section-label" style="text-transform:capitalize">${monthName}</div>
     <div class="cal-grid amisse-cal-grid">${cells}</div>
-    <p class="page-sub" style="margin-top:.85rem">Lun→Dim en boucle · quantités selon l’effectif du jour</p>
+    <p class="page-sub" style="margin-top:.85rem">Cycle depuis le 1er août 2026 · Jour 1 = Lundi · quantités selon l’effectif</p>
   `;
 }
 
