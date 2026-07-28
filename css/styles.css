@@ -1265,6 +1265,83 @@ button.batch-card.is-selected {
   border-color: var(--cyan);
 }
 
+.people-panel {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+}
+
+.people-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.people-row:last-of-type {
+  border-bottom: none;
+}
+
+.people-info strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+}
+
+.people-info span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.people-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.people-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--teal), var(--cyan));
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 12px rgba(7, 154, 169, 0.28);
+}
+
+.people-btn:active {
+  transform: scale(0.94);
+}
+
+.people-count {
+  min-width: 1.6rem;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.people-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.people-summary strong {
+  color: var(--orange);
+  font-family: var(--font-display);
+}
+
 .cheese-grid {
   display: grid;
   gap: 0.45rem;

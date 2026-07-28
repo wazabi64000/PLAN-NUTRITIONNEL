@@ -20,8 +20,85 @@ export const AMISSE = {
     'Produits économiques Lidl / Aldi / Premier Prix',
     'Fromages légers prioritaires (top 10 kcal)',
     'Batch cooking le dimanche',
+    'Effectif ajustable chaque jour (+/− adulte / enfant)',
   ],
 };
+
+/** Portions : adulte = 1 · enfant 10 ans = 0,75 · enfant 4 ans = 0,5 */
+export const PORTION_ADULT = 1;
+export const PORTION_CHILD10 = 0.75;
+export const PORTION_CHILD4 = 0.5;
+/** Base des recettes Amisse (2 adultes + 10 ans + 4 ans) */
+export const AMISSE_BASE_COEFF = 2 * PORTION_ADULT + PORTION_CHILD10 + PORTION_CHILD4; // 3.25
+export const SPORT_BASE_COEFF = 1;
+
+export const DEFAULT_AMISSE_PEOPLE = { adults: 2, child10: 1, child4: 1 };
+export const DEFAULT_SPORT_PEOPLE = { adults: 1, child10: 0, child4: 0 };
+
+export function peopleCoeff(people = DEFAULT_AMISSE_PEOPLE) {
+  const a = Math.max(0, Number(people.adults) || 0);
+  const c10 = Math.max(0, Number(people.child10) || 0);
+  const c4 = Math.max(0, Number(people.child4) || 0);
+  return a * PORTION_ADULT + c10 * PORTION_CHILD10 + c4 * PORTION_CHILD4;
+}
+
+export function peopleCount(people = DEFAULT_AMISSE_PEOPLE) {
+  return (
+    Math.max(0, Number(people.adults) || 0) +
+    Math.max(0, Number(people.child10) || 0) +
+    Math.max(0, Number(people.child4) || 0)
+  );
+}
+
+export function clampPeople(people) {
+  let next = {
+    adults: Math.max(0, Math.min(12, Number(people.adults) || 0)),
+    child10: Math.max(0, Math.min(12, Number(people.child10) || 0)),
+    child4: Math.max(0, Math.min(12, Number(people.child4) || 0)),
+  };
+  if (peopleCount(next) < 1) next.adults = 1;
+  return next;
+}
+
+function roundQty(qty, unit = '') {
+  const u = String(unit).toLowerCase();
+  if (u.includes('boîte') || u.includes('unité') || u.includes('tête') || u.includes('c.à')) {
+    return Math.max(1, Math.round(qty));
+  }
+  if (qty < 1) return Math.round(qty * 100) / 100;
+  if (qty < 20) return Math.round(qty * 10) / 10;
+  return Math.round(qty);
+}
+
+/** scaleFactor = coeffActuel / coeffBaseRecette */
+export function scaleMeal(meal, scaleFactor) {
+  const f = scaleFactor;
+  return {
+    ...meal,
+    ingredients: meal.ingredients.map((ing) => ({
+      ...ing,
+      qty: roundQty(ing.qty * f, ing.unit),
+    })),
+    calories: Math.round(meal.calories * f),
+    protein: Math.round(meal.protein * f),
+    fat: Math.round(meal.fat * f),
+    carbs: Math.round(meal.carbs * f),
+  };
+}
+
+export function scalePlan(plan, people, baseCoeff = AMISSE_BASE_COEFF) {
+  const coeff = peopleCoeff(people);
+  const factor = baseCoeff > 0 ? coeff / baseCoeff : 1;
+  return {
+    ...plan,
+    coeff,
+    factor,
+    breakfast: scaleMeal(plan.breakfast, factor),
+    lunch: scaleMeal(plan.lunch, factor),
+    snack: scaleMeal(plan.snack, factor),
+    dinner: scaleMeal(plan.dinner, factor),
+  };
+}
 
 function meal(name, ingredients, prepMin, macros) {
   return { name, ingredients, prepMin, ...macros };

@@ -42,9 +42,15 @@ import {
   AMISSE_PORTIONS,
   AMISSE_SHOPPING_WEEK,
   AMISSE_BATCH,
+  AMISSE_BASE_COEFF,
+  SPORT_BASE_COEFF,
   getAmisseDayPlan,
   getAmisseDayIndex,
   amisseDayTotals,
+  scalePlan,
+  peopleCoeff,
+  peopleCount,
+  clampPeople,
 } from './data/amisse.js';
 import { CHEESES, CHEESE_RULES, cheesePortions } from './data/cheeses.js';
 
@@ -197,9 +203,11 @@ async function renderPage() {
 async function viewDashboard() {
   const today = formatDateISO();
   const cycleDay = getCycleDay(state.cycleStart, today);
-  const plan = getDayPlan(cycleDay, state.goal);
-  const totals = dayTotals(plan);
+  const basePlan = getDayPlan(cycleDay, state.goal);
   const daily = await getOrCreateDaily(today);
+  const people = clampPeople(daily.people);
+  const plan = scalePlan(basePlan, people, SPORT_BASE_COEFF);
+  const totals = dayTotals(plan);
   const left = remainingMeals(daily.mealsDone);
   const budget = estimateCycleBudget();
   const pct = Math.round((cycleDay / CYCLE_DAYS) * 100);
@@ -222,6 +230,8 @@ async function viewDashboard() {
         <div class="progress-ring-label">${pct}%</div>
       </div>
     </div>
+
+    ${renderPeoplePanel(people, today, '', SPORT_BASE_COEFF)}
 
     <div class="stat-grid">
       <div class="stat-card water">
@@ -256,7 +266,7 @@ async function viewDashboard() {
       </div>
     </div>
 
-    <div class="section-label">Aujourd'hui · ${totals.calories} kcal · ${totals.protein} g protéines</div>
+    <div class="section-label">Aujourd'hui · ${totals.calories} kcal · ${totals.protein} g protéines · ${peopleCount(people)} pers.</div>
     <div class="meal-list">
       ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], today)).join('')}
     </div>
@@ -267,6 +277,64 @@ async function viewDashboard() {
       <div style="display:flex;justify-content:space-between"><span>60 jours</span><strong style="color:var(--orange)">${euro(budget.days60)}</strong></div>
     </div>
   `;
+}
+
+function renderPeoplePanel(people, dateISO, prefix, baseCoeff) {
+  const coeff = peopleCoeff(people);
+  const factor = baseCoeff > 0 ? coeff / baseCoeff : 1;
+  const rows = [
+    { key: 'adults', label: 'Adultes', hint: 'part 1' },
+    { key: 'child10', label: 'Enfants 10 ans', hint: 'part 0,75' },
+    { key: 'child4', label: 'Enfants 4 ans', hint: 'part 0,5' },
+  ];
+  return `
+    <div class="section-label">Personnes présentes</div>
+    <div class="people-panel surface" data-people-date="${dateISO}" data-people-prefix="${prefix}" data-people-base="${baseCoeff}">
+      ${rows
+        .map(
+          (row) => `
+        <div class="people-row">
+          <div class="people-info">
+            <strong>${row.label}</strong>
+            <span>${row.hint}</span>
+          </div>
+          <div class="people-stepper">
+            <button type="button" class="people-btn" data-people-key="${row.key}" data-people-delta="-1" aria-label="Retirer">−</button>
+            <span class="people-count">${people[row.key]}</span>
+            <button type="button" class="people-btn" data-people-key="${row.key}" data-people-delta="1" aria-label="Ajouter">+</button>
+          </div>
+        </div>`
+        )
+        .join('')}
+      <div class="people-summary">
+        <span>${peopleCount(people)} personne${peopleCount(people) > 1 ? 's' : ''}</span>
+        <strong>×${factor.toFixed(2)} · coeff ${coeff.toFixed(2)}</strong>
+      </div>
+    </div>
+  `;
+}
+
+function bindPeoplePanel() {
+  document.querySelectorAll('.people-btn').forEach((btn) => {
+    btn.onclick = async () => {
+      const panel = btn.closest('.people-panel');
+      const date = panel.dataset.peopleDate;
+      const prefix = panel.dataset.peoplePrefix || '';
+      const key = btn.dataset.peopleKey;
+      const delta = Number(btn.dataset.peopleDelta);
+      const d = await getOrCreateDaily(date, prefix);
+      const people = clampPeople({
+        ...d.people,
+        [key]: (Number(d.people?.[key]) || 0) + delta,
+      });
+      d.people = people;
+      await saveDaily(d);
+      toast(
+        `${peopleCount(people)} pers. · quantités ×${(peopleCoeff(people) / Number(panel.dataset.peopleBase)).toFixed(2)}`
+      );
+      renderPage();
+    };
+  });
 }
 
 function renderMealCard(meal, type, done, dateISO, prefix = '') {
@@ -297,6 +365,7 @@ function renderMealCard(meal, type, done, dateISO, prefix = '') {
 }
 
 function bindDashboard() {
+  bindPeoplePanel();
   document.querySelectorAll('[data-water]').forEach((btn) => {
     btn.onclick = async () => {
       const today = formatDateISO();
@@ -357,9 +426,11 @@ async function viewPlanning() {
   }
 
   const cycleDay = getCycleDay(state.cycleStart, date);
-  const plan = getDayPlan(cycleDay, state.goal);
-  const totals = dayTotals(plan);
+  const basePlan = getDayPlan(cycleDay, state.goal);
   const daily = await getOrCreateDaily(date);
+  const people = clampPeople(daily.people);
+  const plan = scalePlan(basePlan, people, SPORT_BASE_COEFF);
+  const totals = dayTotals(plan);
   const isCustom = state.planView === 'day' && date !== today && date !== addDays(today, 1);
 
   return `
@@ -372,7 +443,8 @@ async function viewPlanning() {
       ${isCustom ? `<button class="chip active accent">Jour ${cycleDay}</button>` : ''}
     </div>
     <p class="page-sub" style="margin-top:-.4rem;text-transform:capitalize">${formatFR(date)}</p>
-    <div class="section-label">Jour ${cycleDay} · Menu ${plan.phase}${plan.phase === 'A' ? ' (base)' : ' (variation)'} · ${totals.calories} kcal</div>
+    ${renderPeoplePanel(people, date, '', SPORT_BASE_COEFF)}
+    <div class="section-label">Jour ${cycleDay} · Menu ${plan.phase}${plan.phase === 'A' ? ' (base)' : ' (variation)'} · ${totals.calories} kcal · ${peopleCount(people)} pers.</div>
     <div class="meal-list">
       ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], date)).join('')}
     </div>
@@ -413,6 +485,7 @@ function renderCalendar(todayISO) {
 }
 
 function bindPlanning() {
+  bindPeoplePanel();
   document.querySelectorAll('[data-plan]').forEach((btn) => {
     btn.onclick = () => {
       state.planView = btn.dataset.plan;
@@ -551,9 +624,11 @@ function viewBatch() {
 /* ===== AMISSE (famille) ===== */
 async function viewAmisse() {
   const today = formatDateISO();
-  const dayPlan = getAmisseDayPlan(new Date());
-  const totals = amisseDayTotals(dayPlan);
+  const baseDayPlan = getAmisseDayPlan(new Date());
   const daily = await getOrCreateDaily(today, 'amisse:');
+  const people = clampPeople(daily.people);
+  const dayPlan = scalePlan(baseDayPlan, people, AMISSE_BASE_COEFF);
+  const totals = amisseDayTotals(dayPlan);
   const left = remainingMeals(daily.mealsDone);
   const shopTotal = estimateListTotal(AMISSE_SHOPPING_WEEK);
 
@@ -572,16 +647,14 @@ async function viewAmisse() {
       <div class="hero-dash amisse-hero">
         <div class="eyebrow">Famille Amisse · ${dayPlan.label}</div>
         <h2>Manger sainement</h2>
-        <p>2 adultes · enfant 10 ans · enfant 4 ans — ${left} repas restants</p>
+        <p>${peopleCount(people)} personne${peopleCount(people) > 1 ? 's' : ''} — ${left} repas restants</p>
       </div>
-      <div class="member-row">
-        ${AMISSE.members.map((m) => `<span class="member-chip">${m.label}</span>`).join('')}
-      </div>
-      <div class="section-label">Portions</div>
+      ${renderPeoplePanel(people, today, 'amisse:', AMISSE_BASE_COEFF)}
+      <div class="section-label">Portions de référence (famille complète)</div>
       <div class="surface" style="margin-bottom:1rem">
         ${AMISSE_PORTIONS.map((p) => `<div style="display:flex;justify-content:space-between;gap:.75rem;margin-bottom:.35rem"><strong>${p.member}</strong><span style="color:var(--text-muted);font-size:.85rem;text-align:right">${p.hint}</span></div>`).join('')}
       </div>
-      <div class="section-label">Menus du jour · ${totals.calories} kcal famille · ${totals.protein} g protéines</div>
+      <div class="section-label">Menus du jour · ${totals.calories} kcal · ${totals.protein} g protéines · ×${dayPlan.factor.toFixed(2)}</div>
       <div class="meal-list">
         ${MEAL_TYPES.map((t) => renderMealCard(dayPlan[t.id], t, daily.mealsDone?.[t.id], today, 'amisse:')).join('')}
       </div>
@@ -589,15 +662,17 @@ async function viewAmisse() {
       <ul class="future-list surface" style="padding:0;margin-bottom:1rem">
         ${AMISSE.principles.map((p) => `<li>${p}</li>`).join('')}
       </ul>
-      <p class="page-sub">Le programme Sport (sèche / masse) reste inchangé dans les autres onglets.</p>
+      <p class="page-sub">Seul ? Mets Adultes à 1 et Enfants à 0 — les quantités se recalculent.</p>
     `;
   } else if (state.amisseTab === 'week') {
     const selected = state.amisseSelectedDate || today;
-    const selectedPlan = getAmisseDayPlan(parseISO(selected));
-    const selectedTotals = amisseDayTotals(selectedPlan);
     const selectedDaily = await getOrCreateDaily(selected, 'amisse:');
+    const selectedPeople = clampPeople(selectedDaily.people);
+    const selectedPlan = scalePlan(getAmisseDayPlan(parseISO(selected)), selectedPeople, AMISSE_BASE_COEFF);
+    const selectedTotals = amisseDayTotals(selectedPlan);
     body = `
       ${renderAmisseCalendar(today, selected)}
+      ${renderPeoplePanel(selectedPeople, selected, 'amisse:', AMISSE_BASE_COEFF)}
       <div class="section-label">Programme de la semaine</div>
       <div class="amisse-week-strip">
         ${AMISSE_WEEK.map((d, idx) => {
@@ -611,7 +686,7 @@ async function viewAmisse() {
         }).join('')}
       </div>
       <div class="section-label" style="text-transform:capitalize">${formatFR(selected)} · ${selectedPlan.label}</div>
-      <p class="page-sub" style="margin-top:-.35rem">${selectedTotals.calories} kcal famille · ${selectedTotals.protein} g protéines</p>
+      <p class="page-sub" style="margin-top:-.35rem">${selectedTotals.calories} kcal · ${selectedTotals.protein} g prot · ${peopleCount(selectedPeople)} pers. · ×${selectedPlan.factor.toFixed(2)}</p>
       <div class="meal-list">
         ${MEAL_TYPES.map((t) => renderMealCard(selectedPlan[t.id], t, selectedDaily.mealsDone?.[t.id], selected, 'amisse:')).join('')}
       </div>
@@ -625,7 +700,7 @@ async function viewAmisse() {
             <h3>${d.label}${isToday ? ' · aujourd’hui' : ''}</h3>
             <p>${d.breakfast.name} · ${d.lunch.name}<br>${d.snack.name} · ${d.dinner.name}</p>
             <div class="batch-meta">
-              <span class="tag">${t.calories} kcal</span>
+              <span class="tag">${t.calories} kcal base famille</span>
               <span class="tag">${t.protein} g prot</span>
             </div>
           </button>`;
@@ -738,6 +813,7 @@ async function viewAmisse() {
 }
 
 function bindAmisse() {
+  bindPeoplePanel();
   document.querySelectorAll('[data-amisse]').forEach((btn) => {
     btn.onclick = () => {
       state.amisseTab = btn.dataset.amisse;

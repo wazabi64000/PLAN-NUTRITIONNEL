@@ -62,7 +62,16 @@ export async function getOrCreateDaily(date, prefix = '') {
       date: key,
       waterMl: 0,
       mealsDone: { breakfast: false, lunch: false, snack: false, dinner: false },
+      people: prefix.startsWith('amisse')
+        ? { adults: 2, child10: 1, child4: 1 }
+        : { adults: 1, child10: 0, child4: 0 },
     };
+    await saveDaily(d);
+  }
+  if (!d.people) {
+    d.people = prefix.startsWith('amisse')
+      ? { adults: 2, child10: 1, child4: 1 }
+      : { adults: 1, child10: 0, child4: 0 };
     await saveDaily(d);
   }
   return d;
