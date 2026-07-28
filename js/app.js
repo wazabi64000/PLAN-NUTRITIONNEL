@@ -483,7 +483,7 @@ async function viewPlanning() {
 
   return `
     <h1 class="page-title">Planning</h1>
-    <p class="page-sub">Programme semaine par semaine · dès le 1er août 2026</p>
+    <p class="page-sub">Programme semaine par semaine · dès le ${parseISO(PROGRAM_START_ISO).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
     ${renderProgramBanner(parseISO(selected))}
     ${renderWeekNav(selected)}
     ${renderPeoplePanel(people, selected)}
@@ -644,6 +644,15 @@ async function viewSettings() {
       <div style="display:flex;justify-content:space-between"><span>≈ 60 jours</span><strong style="color:var(--orange)">${euro(budget.days60)}</strong></div>
     </div>
 
+    <div class="section-label">Programme</div>
+    <div class="surface" style="margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;gap:.75rem;margin-bottom:.35rem">
+        <span>Début</span>
+        <strong>${parseISO(PROGRAM_START_ISO).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+      </div>
+      <p class="page-sub" style="margin:0">Jour 1 = Lundi du cycle · semaines en boucle</p>
+    </div>
+
     <div class="section-label">Effectif par défaut</div>
     <div class="surface" style="margin-bottom:1rem">
       <p class="page-sub" style="margin:0">Chaque jour mémorise son propre effectif (+/−). Défaut : 2 adultes, 1 enfant 10 ans, 1 enfant 4 ans.</p>
@@ -746,7 +755,7 @@ function setupPwa() {
 
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
-  const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || '12';
+  const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || '16';
   try {
     const reg = await navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`, {
       updateViaCache: 'none',

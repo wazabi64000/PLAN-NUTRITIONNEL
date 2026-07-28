@@ -34,7 +34,7 @@ python3 -m http.server 5173
 
 ### Installation PWA
 
-Manifest + service worker `v15` + icônes maskable.
+Manifest + service worker `v16` + icônes maskable.
 
 - Android / Chrome / Edge : bannière Installer
 - iPhone : Safari → Partager → Sur l’écran d’accueil
