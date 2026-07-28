@@ -13,7 +13,7 @@ Palette **Nutrition 5** : `#D2EE6B` · `#00BCD4` · `#079AA9` · `#FCE006` · `#
 ## Fonctionnalités
 
 - **Accueil** — menus du jour · compteur +/− adultes / enfants · quantités recalculées
-- **Planning** — navigation **semaine par semaine** (précédent / suivant) · dès le **1er août 2026**
+- **Planning** — navigation **semaine par semaine** (Sam→Ven) · dès le **samedi 1er août 2026**
 - **Courses** — liste semaine type famille · cases mémorisées · prix estimés
 - **Batch cooking** — session dimanche · pizzas sarrasin + farine de son
 - **Dark / light** · mobile first · offline · installable
@@ -34,7 +34,7 @@ python3 -m http.server 5173
 
 ### Installation PWA
 
-Manifest + service worker `v16` + icônes maskable.
+Manifest + service worker `v17` + icônes maskable.
 
 - Android / Chrome / Edge : bannière Installer
 - iPhone : Safari → Partager → Sur l’écran d’accueil

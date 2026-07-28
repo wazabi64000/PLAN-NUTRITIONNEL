@@ -311,7 +311,7 @@ function renderProgramBanner(date = new Date()) {
     return `
       <div class="surface" style="margin-bottom:1rem;border-left:3px solid var(--accent)">
         <strong>Programme à partir du ${startLabel}</strong>
-        <p class="page-sub" style="margin:0.35rem 0 0">Encore ${left} jour${left > 1 ? 's' : ''} · Jour 1 = Lundi du cycle</p>
+        <p class="page-sub" style="margin:0.35rem 0 0">Encore ${left} jour${left > 1 ? 's' : ''} · Jour 1 = samedi 1er août</p>
       </div>`;
   }
   return `
@@ -650,7 +650,7 @@ async function viewSettings() {
         <span>Début</span>
         <strong>${parseISO(PROGRAM_START_ISO).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
       </div>
-      <p class="page-sub" style="margin:0">Jour 1 = Lundi du cycle · semaines en boucle</p>
+      <p class="page-sub" style="margin:0">Jour 1 = samedi 1er août 2026 · semaines Sam→Ven</p>
     </div>
 
     <div class="section-label">Effectif par défaut</div>
@@ -755,7 +755,7 @@ function setupPwa() {
 
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
-  const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || '16';
+  const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || '17';
   try {
     const reg = await navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`, {
       updateViaCache: 'none',

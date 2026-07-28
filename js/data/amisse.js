@@ -22,7 +22,7 @@ export const AMISSE = {
     'Pizzas : farine de sarrasin + farine de son (sam. & dim.)',
     'Batch cooking le dimanche',
     'Effectif ajustable chaque jour (+/− adulte / enfant)',
-    'Démarrage : 1er août 2026 (Jour 1 = Lundi)',
+    'Démarrage : samedi 1er août 2026 (Jour 1 = Samedi)',
   ],
 };
 
@@ -35,7 +35,7 @@ export const AMISSE_BASE_COEFF = 2 * PORTION_ADULT + PORTION_CHILD10 + PORTION_C
 
 export const DEFAULT_AMISSE_PEOPLE = { adults: 2, child10: 1, child4: 1 };
 
-/** Début officiel du programme (Jour 1 = Lundi du cycle) */
+/** Début officiel du programme (Jour 1 = Samedi 1er août 2026) */
 export const PROGRAM_START_ISO = '2026-08-01';
 
 function startOfLocalDay(date) {
@@ -129,140 +129,10 @@ function meal(name, ingredients, prepMin, macros) {
   return { name, ingredients, prepMin, ...macros };
 }
 
-/** Cycle 7 jours — portions famille (4 personnes, quantités totales casserole) */
+/** Cycle 7 jours — Sam→Ven (1er août 2026 = samedi) · portions famille */
 export const AMISSE_WEEK = [
   {
     day: 1,
-    label: 'Lundi',
-    breakfast: meal('Œufs + pain complet + fruit', [
-      { name: 'Œufs', qty: 6, unit: 'unités', cat: 'oeufs' },
-      { name: 'Pain complet', qty: 200, unit: 'g', cat: 'feculents' },
-      { name: 'Banane', qty: 2, unit: 'unités', cat: 'fruits' },
-      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
-    ], 15, { calories: 1450, protein: 55, fat: 42, carbs: 180 }),
-    lunch: meal('Poulet rôti + riz + haricots verts', [
-      { name: 'Blanc de poulet', qty: 600, unit: 'g', cat: 'viandes' },
-      { name: 'Riz basmati', qty: 300, unit: 'g', cat: 'feculents' },
-      { name: 'Haricots verts', qty: 600, unit: 'g', cat: 'legumes' },
-      { name: 'Huile d\'olive', qty: 20, unit: 'ml', cat: 'graisses' },
-    ], 40, { calories: 2200, protein: 160, fat: 40, carbs: 220 }),
-    snack: meal('Fromage blanc 0 % + fruits', [
-      { name: 'Fromage blanc 0 %', qty: 500, unit: 'g', cat: 'laitiers' },
-      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
-    ], 5, { calories: 405, protein: 40, fat: 2, carbs: 55 }),
-    dinner: meal('Colin + pommes de terre + carottes', [
-      { name: 'Colin', qty: 600, unit: 'g', cat: 'poissons' },
-      { name: 'Pomme de terre', qty: 800, unit: 'g', cat: 'feculents' },
-      { name: 'Carottes', qty: 400, unit: 'g', cat: 'legumes' },
-      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
-    ], 35, { calories: 1800, protein: 130, fat: 30, carbs: 190 }),
-  },
-  {
-    day: 2,
-    label: 'Mardi',
-    breakfast: meal('Flocons d\'avoine + fromage blanc + banane', [
-      { name: 'Flocons d\'avoine', qty: 160, unit: 'g', cat: 'feculents' },
-      { name: 'Fromage blanc 0 %', qty: 400, unit: 'g', cat: 'laitiers' },
-      { name: 'Banane', qty: 3, unit: 'unités', cat: 'fruits' },
-    ], 10, { calories: 1300, protein: 55, fat: 12, carbs: 210 }),
-    lunch: meal('Dinde + lentilles + courgettes', [
-      { name: 'Escalope de dinde', qty: 550, unit: 'g', cat: 'viandes' },
-      { name: 'Lentilles', qty: 280, unit: 'g', cat: 'feculents' },
-      { name: 'Courgettes', qty: 500, unit: 'g', cat: 'legumes' },
-      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
-    ], 35, { calories: 2100, protein: 155, fat: 35, carbs: 200 }),
-    snack: meal('Cancoillotte + pain complet', [
-      { name: 'Cancoillotte', qty: 250, unit: 'g', cat: 'laitiers' },
-      { name: 'Pain complet', qty: 120, unit: 'g', cat: 'feculents' },
-    ], 5, { calories: 595, protein: 45, fat: 12, carbs: 70 }),
-    dinner: meal('Omelette familiale + salade + tomates', [
-      { name: 'Œufs', qty: 8, unit: 'unités', cat: 'oeufs' },
-      { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
-      { name: 'Tomates', qty: 300, unit: 'g', cat: 'legumes' },
-      { name: 'Pain complet', qty: 120, unit: 'g', cat: 'feculents' },
-    ], 20, { calories: 1400, protein: 70, fat: 70, carbs: 80 }),
-  },
-  {
-    day: 3,
-    label: 'Mercredi',
-    breakfast: meal('Œufs + avoine + pomme', [
-      { name: 'Œufs', qty: 5, unit: 'unités', cat: 'oeufs' },
-      { name: 'Flocons d\'avoine', qty: 120, unit: 'g', cat: 'feculents' },
-      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
-    ], 12, { calories: 1200, protein: 50, fat: 35, carbs: 140 }),
-    lunch: meal('Steak haché halal + riz + carottes', [
-      { name: 'Steak haché halal 5 %', qty: 500, unit: 'g', cat: 'viandes' },
-      { name: 'Riz basmati', qty: 280, unit: 'g', cat: 'feculents' },
-      { name: 'Carottes', qty: 400, unit: 'g', cat: 'legumes' },
-      { name: 'Oignons', qty: 150, unit: 'g', cat: 'epicerie' },
-    ], 30, { calories: 2300, protein: 130, fat: 50, carbs: 240 }),
-    snack: meal('Ricotta + fruits', [
-      { name: 'Ricotta', qty: 320, unit: 'g', cat: 'laitiers' },
-      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
-    ], 3, { calories: 717, protein: 35, fat: 42, carbs: 50 }),
-    dinner: meal('Thon + pommes de terre + haricots verts', [
-      { name: 'Thon (boîte)', qty: 3, unit: 'boîtes', cat: 'poissons' },
-      { name: 'Pomme de terre', qty: 700, unit: 'g', cat: 'feculents' },
-      { name: 'Haricots verts', qty: 500, unit: 'g', cat: 'legumes' },
-      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
-    ], 25, { calories: 1700, protein: 110, fat: 35, carbs: 180 }),
-  },
-  {
-    day: 4,
-    label: 'Jeudi',
-    breakfast: meal('Fromage blanc + avoine + fruits', [
-      { name: 'Fromage blanc 0 %', qty: 500, unit: 'g', cat: 'laitiers' },
-      { name: 'Flocons d\'avoine', qty: 140, unit: 'g', cat: 'feculents' },
-      { name: 'Banane', qty: 2, unit: 'unités', cat: 'fruits' },
-      { name: 'Pomme', qty: 1, unit: 'unité', cat: 'fruits' },
-    ], 8, { calories: 1250, protein: 55, fat: 10, carbs: 200 }),
-    lunch: meal('Poulet + quinoa-riz + épinards', [
-      { name: 'Blanc de poulet', qty: 600, unit: 'g', cat: 'viandes' },
-      { name: 'Riz basmati', qty: 280, unit: 'g', cat: 'feculents' },
-      { name: 'Épinards', qty: 500, unit: 'g', cat: 'legumes' },
-      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
-    ], 35, { calories: 2100, protein: 160, fat: 35, carbs: 200 }),
-    snack: meal('Fromage frais + pain complet', [
-      { name: 'Fromage frais', qty: 200, unit: 'g', cat: 'laitiers' },
-      { name: 'Pain complet', qty: 120, unit: 'g', cat: 'feculents' },
-    ], 5, { calories: 714, protein: 30, fat: 34, carbs: 70 }),
-    dinner: meal('Maquereau + salade + riz', [
-      { name: 'Maquereau (boîte)', qty: 3, unit: 'boîtes', cat: 'poissons' },
-      { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
-      { name: 'Tomates', qty: 250, unit: 'g', cat: 'legumes' },
-      { name: 'Riz basmati', qty: 150, unit: 'g', cat: 'feculents' },
-    ], 20, { calories: 1600, protein: 95, fat: 70, carbs: 120 }),
-  },
-  {
-    day: 5,
-    label: 'Vendredi',
-    breakfast: meal('Omelette + pain complet + orange', [
-      { name: 'Œufs', qty: 6, unit: 'unités', cat: 'oeufs' },
-      { name: 'Pain complet', qty: 180, unit: 'g', cat: 'feculents' },
-      { name: 'Orange', qty: 2, unit: 'unités', cat: 'fruits' },
-      { name: 'Tomates', qty: 150, unit: 'g', cat: 'legumes' },
-    ], 15, { calories: 1300, protein: 55, fat: 40, carbs: 140 }),
-    lunch: meal('Dinde + pommes de terre + légumes', [
-      { name: 'Escalope de dinde', qty: 550, unit: 'g', cat: 'viandes' },
-      { name: 'Pomme de terre', qty: 800, unit: 'g', cat: 'feculents' },
-      { name: 'Courgettes', qty: 400, unit: 'g', cat: 'legumes' },
-      { name: 'Carottes', qty: 300, unit: 'g', cat: 'legumes' },
-    ], 40, { calories: 2000, protein: 145, fat: 25, carbs: 220 }),
-    snack: meal('Chèvre frais + crudités', [
-      { name: 'Fromage de chèvre frais', qty: 130, unit: 'g', cat: 'laitiers' },
-      { name: 'Tomates', qty: 200, unit: 'g', cat: 'legumes' },
-      { name: 'Carottes', qty: 150, unit: 'g', cat: 'legumes' },
-    ], 5, { calories: 356, protein: 23, fat: 21, carbs: 20 }),
-    dinner: meal('Soupe lentilles + œufs + salade', [
-      { name: 'Lentilles', qty: 250, unit: 'g', cat: 'feculents' },
-      { name: 'Œufs', qty: 4, unit: 'unités', cat: 'oeufs' },
-      { name: 'Carottes', qty: 200, unit: 'g', cat: 'legumes' },
-      { name: 'Oignons', qty: 100, unit: 'g', cat: 'epicerie' },
-      { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
-    ], 35, { calories: 1500, protein: 80, fat: 30, carbs: 180 }),
-  },
-  {
-    day: 6,
     label: 'Samedi',
     breakfast: meal('Pancakes avoine + fromage blanc + fruits', [
       { name: 'Flocons d\'avoine', qty: 200, unit: 'g', cat: 'feculents' },
@@ -295,7 +165,7 @@ export const AMISSE_WEEK = [
     ], 45, { calories: 2480, protein: 195, fat: 66, carbs: 260 }),
   },
   {
-    day: 7,
+    day: 2,
     label: 'Dimanche',
     breakfast: meal('Brunch œufs + pain + fruits', [
       { name: 'Œufs', qty: 8, unit: 'unités', cat: 'oeufs' },
@@ -327,6 +197,136 @@ export const AMISSE_WEEK = [
       { name: 'Herbes de Provence', qty: 1, unit: 'c.à.c', cat: 'epicerie' },
     ], 45, { calories: 2200, protein: 95, fat: 85, carbs: 240 }),
   },
+  {
+    day: 3,
+    label: 'Lundi',
+    breakfast: meal('Œufs + pain complet + fruit', [
+      { name: 'Œufs', qty: 6, unit: 'unités', cat: 'oeufs' },
+      { name: 'Pain complet', qty: 200, unit: 'g', cat: 'feculents' },
+      { name: 'Banane', qty: 2, unit: 'unités', cat: 'fruits' },
+      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
+    ], 15, { calories: 1450, protein: 55, fat: 42, carbs: 180 }),
+    lunch: meal('Poulet rôti + riz + haricots verts', [
+      { name: 'Blanc de poulet', qty: 600, unit: 'g', cat: 'viandes' },
+      { name: 'Riz basmati', qty: 300, unit: 'g', cat: 'feculents' },
+      { name: 'Haricots verts', qty: 600, unit: 'g', cat: 'legumes' },
+      { name: 'Huile d\'olive', qty: 20, unit: 'ml', cat: 'graisses' },
+    ], 40, { calories: 2200, protein: 160, fat: 40, carbs: 220 }),
+    snack: meal('Fromage blanc 0 % + fruits', [
+      { name: 'Fromage blanc 0 %', qty: 500, unit: 'g', cat: 'laitiers' },
+      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
+    ], 5, { calories: 405, protein: 40, fat: 2, carbs: 55 }),
+    dinner: meal('Colin + pommes de terre + carottes', [
+      { name: 'Colin', qty: 600, unit: 'g', cat: 'poissons' },
+      { name: 'Pomme de terre', qty: 800, unit: 'g', cat: 'feculents' },
+      { name: 'Carottes', qty: 400, unit: 'g', cat: 'legumes' },
+      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
+    ], 35, { calories: 1800, protein: 130, fat: 30, carbs: 190 }),
+  },
+  {
+    day: 4,
+    label: 'Mardi',
+    breakfast: meal('Flocons d\'avoine + fromage blanc + banane', [
+      { name: 'Flocons d\'avoine', qty: 160, unit: 'g', cat: 'feculents' },
+      { name: 'Fromage blanc 0 %', qty: 400, unit: 'g', cat: 'laitiers' },
+      { name: 'Banane', qty: 3, unit: 'unités', cat: 'fruits' },
+    ], 10, { calories: 1300, protein: 55, fat: 12, carbs: 210 }),
+    lunch: meal('Dinde + lentilles + courgettes', [
+      { name: 'Escalope de dinde', qty: 550, unit: 'g', cat: 'viandes' },
+      { name: 'Lentilles', qty: 280, unit: 'g', cat: 'feculents' },
+      { name: 'Courgettes', qty: 500, unit: 'g', cat: 'legumes' },
+      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
+    ], 35, { calories: 2100, protein: 155, fat: 35, carbs: 200 }),
+    snack: meal('Cancoillotte + pain complet', [
+      { name: 'Cancoillotte', qty: 250, unit: 'g', cat: 'laitiers' },
+      { name: 'Pain complet', qty: 120, unit: 'g', cat: 'feculents' },
+    ], 5, { calories: 595, protein: 45, fat: 12, carbs: 70 }),
+    dinner: meal('Omelette familiale + salade + tomates', [
+      { name: 'Œufs', qty: 8, unit: 'unités', cat: 'oeufs' },
+      { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
+      { name: 'Tomates', qty: 300, unit: 'g', cat: 'legumes' },
+      { name: 'Pain complet', qty: 120, unit: 'g', cat: 'feculents' },
+    ], 20, { calories: 1400, protein: 70, fat: 70, carbs: 80 }),
+  },
+  {
+    day: 5,
+    label: 'Mercredi',
+    breakfast: meal('Œufs + avoine + pomme', [
+      { name: 'Œufs', qty: 5, unit: 'unités', cat: 'oeufs' },
+      { name: 'Flocons d\'avoine', qty: 120, unit: 'g', cat: 'feculents' },
+      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
+    ], 12, { calories: 1200, protein: 50, fat: 35, carbs: 140 }),
+    lunch: meal('Steak haché halal + riz + carottes', [
+      { name: 'Steak haché halal 5 %', qty: 500, unit: 'g', cat: 'viandes' },
+      { name: 'Riz basmati', qty: 280, unit: 'g', cat: 'feculents' },
+      { name: 'Carottes', qty: 400, unit: 'g', cat: 'legumes' },
+      { name: 'Oignons', qty: 150, unit: 'g', cat: 'epicerie' },
+    ], 30, { calories: 2300, protein: 130, fat: 50, carbs: 240 }),
+    snack: meal('Ricotta + fruits', [
+      { name: 'Ricotta', qty: 320, unit: 'g', cat: 'laitiers' },
+      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
+    ], 3, { calories: 717, protein: 35, fat: 42, carbs: 50 }),
+    dinner: meal('Thon + pommes de terre + haricots verts', [
+      { name: 'Thon (boîte)', qty: 3, unit: 'boîtes', cat: 'poissons' },
+      { name: 'Pomme de terre', qty: 700, unit: 'g', cat: 'feculents' },
+      { name: 'Haricots verts', qty: 500, unit: 'g', cat: 'legumes' },
+      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
+    ], 25, { calories: 1700, protein: 110, fat: 35, carbs: 180 }),
+  },
+  {
+    day: 6,
+    label: 'Jeudi',
+    breakfast: meal('Fromage blanc + avoine + fruits', [
+      { name: 'Fromage blanc 0 %', qty: 500, unit: 'g', cat: 'laitiers' },
+      { name: 'Flocons d\'avoine', qty: 140, unit: 'g', cat: 'feculents' },
+      { name: 'Banane', qty: 2, unit: 'unités', cat: 'fruits' },
+      { name: 'Pomme', qty: 1, unit: 'unité', cat: 'fruits' },
+    ], 8, { calories: 1250, protein: 55, fat: 10, carbs: 200 }),
+    lunch: meal('Poulet + quinoa-riz + épinards', [
+      { name: 'Blanc de poulet', qty: 600, unit: 'g', cat: 'viandes' },
+      { name: 'Riz basmati', qty: 280, unit: 'g', cat: 'feculents' },
+      { name: 'Épinards', qty: 500, unit: 'g', cat: 'legumes' },
+      { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
+    ], 35, { calories: 2100, protein: 160, fat: 35, carbs: 200 }),
+    snack: meal('Fromage frais + pain complet', [
+      { name: 'Fromage frais', qty: 200, unit: 'g', cat: 'laitiers' },
+      { name: 'Pain complet', qty: 120, unit: 'g', cat: 'feculents' },
+    ], 5, { calories: 714, protein: 30, fat: 34, carbs: 70 }),
+    dinner: meal('Maquereau + salade + riz', [
+      { name: 'Maquereau (boîte)', qty: 3, unit: 'boîtes', cat: 'poissons' },
+      { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
+      { name: 'Tomates', qty: 250, unit: 'g', cat: 'legumes' },
+      { name: 'Riz basmati', qty: 150, unit: 'g', cat: 'feculents' },
+    ], 20, { calories: 1600, protein: 95, fat: 70, carbs: 120 }),
+  },
+  {
+    day: 7,
+    label: 'Vendredi',
+    breakfast: meal('Omelette + pain complet + orange', [
+      { name: 'Œufs', qty: 6, unit: 'unités', cat: 'oeufs' },
+      { name: 'Pain complet', qty: 180, unit: 'g', cat: 'feculents' },
+      { name: 'Orange', qty: 2, unit: 'unités', cat: 'fruits' },
+      { name: 'Tomates', qty: 150, unit: 'g', cat: 'legumes' },
+    ], 15, { calories: 1300, protein: 55, fat: 40, carbs: 140 }),
+    lunch: meal('Dinde + pommes de terre + légumes', [
+      { name: 'Escalope de dinde', qty: 550, unit: 'g', cat: 'viandes' },
+      { name: 'Pomme de terre', qty: 800, unit: 'g', cat: 'feculents' },
+      { name: 'Courgettes', qty: 400, unit: 'g', cat: 'legumes' },
+      { name: 'Carottes', qty: 300, unit: 'g', cat: 'legumes' },
+    ], 40, { calories: 2000, protein: 145, fat: 25, carbs: 220 }),
+    snack: meal('Chèvre frais + crudités', [
+      { name: 'Fromage de chèvre frais', qty: 130, unit: 'g', cat: 'laitiers' },
+      { name: 'Tomates', qty: 200, unit: 'g', cat: 'legumes' },
+      { name: 'Carottes', qty: 150, unit: 'g', cat: 'legumes' },
+    ], 5, { calories: 356, protein: 23, fat: 21, carbs: 20 }),
+    dinner: meal('Soupe lentilles + œufs + salade', [
+      { name: 'Lentilles', qty: 250, unit: 'g', cat: 'feculents' },
+      { name: 'Œufs', qty: 4, unit: 'unités', cat: 'oeufs' },
+      { name: 'Carottes', qty: 200, unit: 'g', cat: 'legumes' },
+      { name: 'Oignons', qty: 100, unit: 'g', cat: 'epicerie' },
+      { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
+    ], 35, { calories: 1500, protein: 80, fat: 30, carbs: 180 }),
+  }
 ];
 
 /** Portions indicatives par membre (coeff. famille = 3,25 parts adultes) */
@@ -413,7 +413,7 @@ export const AMISSE_BATCH = [
 ];
 
 export function getAmisseDayIndex(date = new Date()) {
-  // Jour 1 du programme (1er août 2026) = Lundi (index 0), puis boucle 7 jours
+  // Jour 1 du programme (samedi 1er août 2026) = index 0, puis boucle Sam→Ven
   const days = daysSinceProgramStart(date);
   return ((days % 7) + 7) % 7;
 }
@@ -429,7 +429,7 @@ function toISODate(date) {
   return `${y}-${m}-${d}`;
 }
 
-/** Lundi (Jour 1 du cycle) de la semaine programme contenant `date` */
+/** Samedi (Jour 1 du cycle) de la semaine programme contenant `date` */
 export function getProgramWeekStart(date = new Date()) {
   const idx = getAmisseDayIndex(date);
   const d = startOfLocalDay(date);
