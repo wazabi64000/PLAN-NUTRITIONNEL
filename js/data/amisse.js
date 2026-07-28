@@ -418,6 +418,38 @@ export function getAmisseDayPlan(date = new Date()) {
   return AMISSE_WEEK[getAmisseDayIndex(date)];
 }
 
+function toISODate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** Lundi (Jour 1 du cycle) de la semaine programme contenant `date` */
+export function getProgramWeekStart(date = new Date()) {
+  const idx = getAmisseDayIndex(date);
+  const d = startOfLocalDay(date);
+  d.setDate(d.getDate() - idx);
+  return d;
+}
+
+export function getProgramWeekNumber(date = new Date()) {
+  return Math.floor(daysSinceProgramStart(date) / 7) + 1;
+}
+
+export function getProgramWeekStartISO(date = new Date()) {
+  return toISODate(getProgramWeekStart(date));
+}
+
+export function getProgramWeekDates(date = new Date()) {
+  const start = getProgramWeekStart(date);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return toISODate(d);
+  });
+}
+
 export function amisseDayTotals(plan) {
   return [plan.breakfast, plan.lunch, plan.snack, plan.dinner].reduce(
     (acc, m) => ({

@@ -1210,6 +1210,53 @@ a {
   margin-bottom: 1rem;
 }
 
+.week-nav {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+}
+
+.week-nav-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.week-nav-center strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.week-nav-center span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.week-nav-btn {
+  white-space: nowrap;
+  padding-inline: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.amisse-week-day em {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--cyan);
+  line-height: 1;
+}
+
+.week-day-card {
+  margin-bottom: 0.65rem;
+}
+
 .amisse-week-day {
   display: flex;
   flex-direction: column;
@@ -1380,6 +1427,25 @@ button.batch-card.is-selected {
   }
   .amisse-week-day {
     min-height: 44px;
+  }
+  .week-nav {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'center center'
+      'prev next';
+  }
+  .week-nav-center {
+    grid-area: center;
+  }
+  .week-nav-btn[data-week-delta='-1'] {
+    grid-area: prev;
+  }
+  .week-nav-btn[data-week-delta='1'] {
+    grid-area: next;
+  }
+  .week-nav-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 

@@ -47,6 +47,9 @@ import {
   isProgramStarted,
   programDayNumber,
   daysSinceProgramStart,
+  getProgramWeekDates,
+  getProgramWeekNumber,
+  getProgramWeekStartISO,
 } from './data/amisse.js';
 import { CHEESES, CHEESE_RULES, cheesePortions } from './data/cheeses.js';
 
@@ -408,100 +411,128 @@ function bindDashboard() {
 }
 
 /* ===== PLANNING ===== */
+function formatWeekRange(weekStartISO) {
+  const start = parseISO(weekStartISO);
+  const end = parseISO(addDays(weekStartISO, 6));
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+  if (sameMonth) {
+    return `${start.getDate()} – ${end.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })}`;
+  }
+  return `${start.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} – ${end.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })}`;
+}
+
+function renderWeekNav(selectedISO) {
+  const weekStart = getProgramWeekStartISO(parseISO(selectedISO));
+  const weekNum = getProgramWeekNumber(parseISO(selectedISO));
+  const range = formatWeekRange(weekStart);
+  const title =
+    weekNum >= 1
+      ? `Semaine ${weekNum}`
+      : `Aperçu · S${weekNum}`;
+
+  return `
+    <div class="week-nav surface">
+      <button type="button" class="btn btn-ghost week-nav-btn" data-week-delta="-1" aria-label="Semaine précédente">
+        ← Précédent
+      </button>
+      <div class="week-nav-center">
+        <strong>${title}</strong>
+        <span>${range}</span>
+      </div>
+      <button type="button" class="btn btn-primary week-nav-btn" data-week-delta="1" aria-label="Semaine suivante">
+        Suivant →
+      </button>
+    </div>`;
+}
+
 async function viewPlanning() {
   const today = formatDateISO();
   const selected = state.selectedDate || today;
+  const weekDates = getProgramWeekDates(parseISO(selected));
+  const weekStart = weekDates[0];
   const daily = await getOrCreateDaily(selected, PREFIX);
   const people = clampPeople(daily.people || DEFAULT_AMISSE_PEOPLE);
   const plan = scalePlan(getAmisseDayPlan(parseISO(selected)), people, AMISSE_BASE_COEFF);
   const totals = amisseDayTotals(plan);
+  const weekNum = getProgramWeekNumber(parseISO(selected));
+
+  const dayCards = weekDates
+    .map((iso, idx) => {
+      const dPlan = AMISSE_WEEK[idx];
+      const t = amisseDayTotals(dPlan);
+      const isToday = iso === today;
+      const isSelected = iso === selected;
+      const dayLabel = parseISO(iso).toLocaleDateString('fr-FR', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      });
+      return `
+        <button type="button" class="batch-card week-day-card ${isToday ? 'amisse-today' : ''} ${isSelected ? 'is-selected' : ''}" data-cal="${iso}">
+          <h3>${dPlan.label} · ${dayLabel}${isToday ? ' · aujourd’hui' : ''}</h3>
+          <p>${dPlan.breakfast.name} · ${dPlan.lunch.name}<br>${dPlan.snack.name} · ${dPlan.dinner.name}</p>
+          <div class="batch-meta">
+            <span class="tag">${t.calories} kcal</span>
+            <span class="tag">${t.protein} g prot</span>
+          </div>
+        </button>`;
+    })
+    .join('');
 
   return `
     <h1 class="page-title">Planning</h1>
-    <p class="page-sub">Débute le 1er août 2026 · Lun→Dim en boucle</p>
+    <p class="page-sub">Programme semaine par semaine · dès le 1er août 2026</p>
     ${renderProgramBanner(parseISO(selected))}
-    ${renderCalendar(today, selected)}
+    ${renderWeekNav(selected)}
     ${renderPeoplePanel(people, selected)}
     <div class="amisse-week-strip">
-      ${AMISSE_WEEK.map((d, idx) => {
-        const isToday = isProgramStarted() && idx === getAmisseDayIndex(new Date());
-        const isSelected = idx === getAmisseDayIndex(parseISO(selected));
-        return `
-          <button type="button" class="amisse-week-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''}" data-weekday="${idx}">
+      ${weekDates
+        .map((iso, idx) => {
+          const d = AMISSE_WEEK[idx];
+          const dayNum = parseISO(iso).getDate();
+          return `
+          <button type="button" class="amisse-week-day ${iso === today ? 'is-today' : ''} ${iso === selected ? 'is-selected' : ''}" data-cal="${iso}">
             <strong>${d.label.slice(0, 3)}</strong>
-            <span>${d.dinner.name.split('·')[0].trim().slice(0, 18)}</span>
+            <em>${dayNum}</em>
+            <span>${d.dinner.name.split('·')[0].trim().slice(0, 16)}</span>
           </button>`;
-      }).join('')}
+        })
+        .join('')}
     </div>
     <div class="section-label" style="text-transform:capitalize">${formatFR(selected)} · ${plan.label}${programDayNumber(parseISO(selected)) ? ` · Jour ${programDayNumber(parseISO(selected))}` : ''}</div>
     <p class="page-sub" style="margin-top:-.35rem">${totals.calories} kcal · ${totals.protein} g prot · ${peopleCount(people)} pers. · ×${plan.factor.toFixed(2)}</p>
     <div class="meal-list">
       ${MEAL_TYPES.map((t) => renderMealCard(plan[t.id], t, daily.mealsDone?.[t.id], selected)).join('')}
     </div>
-    <div class="section-label">Récap semaine (base 4 pers.)</div>
-    ${AMISSE_WEEK.map((d, idx) => {
-      const t = amisseDayTotals(d);
-      const isToday = isProgramStarted() && idx === getAmisseDayIndex(new Date());
-      const isSelected = idx === getAmisseDayIndex(parseISO(selected));
-      return `
-        <button type="button" class="batch-card ${isToday ? 'amisse-today' : ''} ${isSelected ? 'is-selected' : ''}" data-weekday="${idx}">
-          <h3>${d.label}${isToday ? ' · aujourd’hui' : ''}</h3>
-          <p>${d.breakfast.name} · ${d.lunch.name}<br>${d.snack.name} · ${d.dinner.name}</p>
-          <div class="batch-meta">
-            <span class="tag">${t.calories} kcal</span>
-            <span class="tag">${t.protein} g prot</span>
-          </div>
-        </button>`;
-    }).join('')}
-  `;
-}
-
-function renderCalendar(todayISO, selectedISO) {
-  const base = parseISO(selectedISO || todayISO);
-  const year = base.getFullYear();
-  const month = base.getMonth();
-  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthName = new Date(year, month, 1).toLocaleDateString('fr-FR', {
-    month: 'long',
-    year: 'numeric',
-  });
-
-  let cells = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
-    .map((d) => `<div class="cal-head">${d}</div>`)
-    .join('');
-  for (let i = 0; i < firstDow; i++) cells += `<div class="cal-day empty"></div>`;
-  for (let d = 1; d <= daysInMonth; d++) {
-    const iso = formatDateISO(new Date(year, month, d));
-    const plan = getAmisseDayPlan(new Date(year, month, d));
-    cells += `
-      <button class="cal-day amisse-cal ${iso === todayISO ? 'today' : ''} ${iso === selectedISO ? 'selected' : ''}" data-cal="${iso}" type="button">
-        <span class="cal-num">${d}</span>
-        <span class="phase">${plan.label.slice(0, 3)}</span>
-      </button>`;
-  }
-
-  return `
-    <div class="section-label" style="text-transform:capitalize">${monthName}</div>
-    <div class="cal-grid amisse-cal-grid">${cells}</div>
-    <p class="page-sub" style="margin-top:.85rem">Cycle depuis le 1er août 2026 · Jour 1 = Lundi · quantités selon l’effectif</p>
+    <div class="section-label">Semaine ${weekNum >= 1 ? weekNum : 'aperçu'} · ${formatWeekRange(weekStart)}</div>
+    ${dayCards}
   `;
 }
 
 function bindPlanning() {
   bindPeoplePanel();
-  document.querySelectorAll('[data-cal]').forEach((btn) => {
+  document.querySelectorAll('[data-week-delta]').forEach((btn) => {
     btn.onclick = () => {
-      state.selectedDate = btn.dataset.cal;
+      const delta = Number(btn.dataset.weekDelta);
+      const ref = state.selectedDate || formatDateISO();
+      const weekStart = getProgramWeekStartISO(parseISO(ref));
+      const dayIdx = getAmisseDayIndex(parseISO(ref));
+      const nextWeekStart = addDays(weekStart, delta * 7);
+      state.selectedDate = addDays(nextWeekStart, dayIdx);
       renderPage();
     };
   });
-  document.querySelectorAll('[data-weekday]').forEach((btn) => {
+  document.querySelectorAll('[data-cal]').forEach((btn) => {
     btn.onclick = () => {
-      const idx = Number(btn.dataset.weekday);
-      const ref = state.selectedDate || formatDateISO();
-      const refIdx = getAmisseDayIndex(parseISO(ref));
-      state.selectedDate = addDays(ref, idx - refIdx);
+      state.selectedDate = btn.dataset.cal;
       renderPage();
     };
   });
