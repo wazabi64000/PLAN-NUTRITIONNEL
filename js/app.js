@@ -755,7 +755,7 @@ function setupPwa() {
 
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
-  const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || '17';
+  const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || '18';
   try {
     const reg = await navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`, {
       updateViaCache: 'none',
