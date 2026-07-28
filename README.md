@@ -13,7 +13,7 @@ Palette **Nutrition 5** : `#D2EE6B` · `#00BCD4` · `#079AA9` · `#FCE006` · `#
 ## Fonctionnalités
 
 - **Tableau de bord Sport** — sèche / prise de masse (inchangé)
-- **Section Amisse** — famille 2 adultes + enfants 4 & 10 ans · manger sainement
+- **Section Amisse** — famille 2 adultes + enfants 4 & 10 ans · manger sainement · top 10 fromages légers
 - **Planning** — aujourd’hui / demain / calendrier · menus A & B (rotation 15 jours)
 - **Liste de courses** — semaines 1 à 8 · cases à cocher mémorisées · prix estimés
 - **Batch cooking** — session dimanche · temps gagné

@@ -18,6 +18,7 @@ export const AMISSE = {
     'Protéines maigres · légumes · féculents IG modéré',
     'Exclus : skyr, avocat, brocoli',
     'Produits économiques Lidl / Aldi / Premier Prix',
+    'Fromages légers prioritaires (top 10 kcal)',
     'Batch cooking le dimanche',
   ],
 };
@@ -46,7 +47,7 @@ export const AMISSE_WEEK = [
     snack: meal('Fromage blanc 0 % + fruits', [
       { name: 'Fromage blanc 0 %', qty: 500, unit: 'g', cat: 'laitiers' },
       { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
-    ], 5, { calories: 450, protein: 40, fat: 2, carbs: 55 }),
+    ], 5, { calories: 405, protein: 40, fat: 2, carbs: 55 }),
     dinner: meal('Colin + pommes de terre + carottes', [
       { name: 'Colin', qty: 600, unit: 'g', cat: 'poissons' },
       { name: 'Pomme de terre', qty: 800, unit: 'g', cat: 'feculents' },
@@ -68,10 +69,10 @@ export const AMISSE_WEEK = [
       { name: 'Courgettes', qty: 500, unit: 'g', cat: 'legumes' },
       { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
     ], 35, { calories: 2100, protein: 155, fat: 35, carbs: 200 }),
-    snack: meal('Amandes + fruit', [
-      { name: 'Amandes', qty: 40, unit: 'g', cat: 'graisses' },
-      { name: 'Orange', qty: 2, unit: 'unités', cat: 'fruits' },
-    ], 2, { calories: 380, protein: 10, fat: 24, carbs: 30 }),
+    snack: meal('Cancoillotte + pain complet', [
+      { name: 'Cancoillotte', qty: 250, unit: 'g', cat: 'laitiers' },
+      { name: 'Pain complet', qty: 120, unit: 'g', cat: 'feculents' },
+    ], 5, { calories: 595, protein: 45, fat: 12, carbs: 70 }),
     dinner: meal('Omelette familiale + salade + tomates', [
       { name: 'Œufs', qty: 8, unit: 'unités', cat: 'oeufs' },
       { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
@@ -93,9 +94,10 @@ export const AMISSE_WEEK = [
       { name: 'Carottes', qty: 400, unit: 'g', cat: 'legumes' },
       { name: 'Oignons', qty: 150, unit: 'g', cat: 'epicerie' },
     ], 30, { calories: 2300, protein: 130, fat: 50, carbs: 240 }),
-    snack: meal('Fromage blanc 0 %', [
-      { name: 'Fromage blanc 0 %', qty: 400, unit: 'g', cat: 'laitiers' },
-    ], 2, { calories: 200, protein: 32, fat: 0, carbs: 16 }),
+    snack: meal('Ricotta + fruits', [
+      { name: 'Ricotta', qty: 320, unit: 'g', cat: 'laitiers' },
+      { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
+    ], 3, { calories: 717, protein: 35, fat: 42, carbs: 50 }),
     dinner: meal('Thon + pommes de terre + haricots verts', [
       { name: 'Thon (boîte)', qty: 3, unit: 'boîtes', cat: 'poissons' },
       { name: 'Pomme de terre', qty: 700, unit: 'g', cat: 'feculents' },
@@ -118,10 +120,10 @@ export const AMISSE_WEEK = [
       { name: 'Épinards', qty: 500, unit: 'g', cat: 'legumes' },
       { name: 'Huile d\'olive', qty: 15, unit: 'ml', cat: 'graisses' },
     ], 35, { calories: 2100, protein: 160, fat: 35, carbs: 200 }),
-    snack: meal('Pain complet + fromage blanc', [
+    snack: meal('Fromage frais + pain complet', [
+      { name: 'Fromage frais', qty: 200, unit: 'g', cat: 'laitiers' },
       { name: 'Pain complet', qty: 120, unit: 'g', cat: 'feculents' },
-      { name: 'Fromage blanc 0 %', qty: 250, unit: 'g', cat: 'laitiers' },
-    ], 5, { calories: 420, protein: 28, fat: 4, carbs: 60 }),
+    ], 5, { calories: 714, protein: 30, fat: 34, carbs: 70 }),
     dinner: meal('Maquereau + salade + riz', [
       { name: 'Maquereau (boîte)', qty: 3, unit: 'boîtes', cat: 'poissons' },
       { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
@@ -144,10 +146,11 @@ export const AMISSE_WEEK = [
       { name: 'Courgettes', qty: 400, unit: 'g', cat: 'legumes' },
       { name: 'Carottes', qty: 300, unit: 'g', cat: 'legumes' },
     ], 40, { calories: 2000, protein: 145, fat: 25, carbs: 220 }),
-    snack: meal('Banane + amandes', [
-      { name: 'Banane', qty: 3, unit: 'unités', cat: 'fruits' },
-      { name: 'Amandes', qty: 30, unit: 'g', cat: 'graisses' },
-    ], 2, { calories: 450, protein: 10, fat: 18, carbs: 70 }),
+    snack: meal('Chèvre frais + crudités', [
+      { name: 'Fromage de chèvre frais', qty: 130, unit: 'g', cat: 'laitiers' },
+      { name: 'Tomates', qty: 200, unit: 'g', cat: 'legumes' },
+      { name: 'Carottes', qty: 150, unit: 'g', cat: 'legumes' },
+    ], 5, { calories: 356, protein: 23, fat: 21, carbs: 20 }),
     dinner: meal('Soupe lentilles + œufs + salade', [
       { name: 'Lentilles', qty: 250, unit: 'g', cat: 'feculents' },
       { name: 'Œufs', qty: 4, unit: 'unités', cat: 'oeufs' },
@@ -176,15 +179,16 @@ export const AMISSE_WEEK = [
       { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
       { name: 'Orange', qty: 2, unit: 'unités', cat: 'fruits' },
     ], 2, { calories: 280, protein: 2, fat: 0, carbs: 70 }),
-    dinner: meal('Pizza sarrasin · légumes + escalope (ou thon)', [
+    dinner: meal('Pizza sarrasin · légumes + escalope + mozzarella', [
       { name: 'Farine de sarrasin', qty: 380, unit: 'g', cat: 'feculents' },
       { name: 'Escalope de dinde (ou 3 boîtes thon)', qty: 450, unit: 'g', cat: 'viandes' },
+      { name: 'Mozzarella', qty: 120, unit: 'g', cat: 'laitiers' },
       { name: 'Tomates', qty: 400, unit: 'g', cat: 'legumes' },
       { name: 'Courgettes', qty: 300, unit: 'g', cat: 'legumes' },
       { name: 'Oignons', qty: 150, unit: 'g', cat: 'epicerie' },
-      { name: 'Huile d\'olive', qty: 25, unit: 'ml', cat: 'graisses' },
+      { name: 'Huile d\'olive', qty: 20, unit: 'ml', cat: 'graisses' },
       { name: 'Herbes de Provence', qty: 1, unit: 'c.à.c', cat: 'epicerie' },
-    ], 45, { calories: 2240, protein: 170, fat: 46, carbs: 278 }),
+    ], 45, { calories: 2500, protein: 192, fat: 68, carbs: 275 }),
   },
   {
     day: 7,
@@ -202,30 +206,30 @@ export const AMISSE_WEEK = [
       { name: 'Haricots verts', qty: 400, unit: 'g', cat: 'legumes' },
       { name: 'Huile d\'olive', qty: 20, unit: 'ml', cat: 'graisses' },
     ], 55, { calories: 2500, protein: 180, fat: 45, carbs: 250 }),
-    snack: meal('Fromage blanc + amandes', [
-      { name: 'Fromage blanc 0 %', qty: 400, unit: 'g', cat: 'laitiers' },
-      { name: 'Amandes', qty: 30, unit: 'g', cat: 'graisses' },
-    ], 3, { calories: 400, protein: 36, fat: 18, carbs: 20 }),
-    dinner: meal('Léger : soupe légumes + omelette', [
+    snack: meal('Feta + salade tomates', [
+      { name: 'Feta', qty: 100, unit: 'g', cat: 'laitiers' },
+      { name: 'Tomates', qty: 250, unit: 'g', cat: 'legumes' },
+      { name: 'Salade', qty: 1, unit: 'unité', cat: 'legumes' },
+    ], 5, { calories: 334, protein: 16, fat: 22, carbs: 15 }),
+    dinner: meal('Camembert + soupe légumes (quartier / pers.)', [
+      { name: 'Camembert', qty: 100, unit: 'g', cat: 'laitiers' },
       { name: 'Carottes', qty: 300, unit: 'g', cat: 'legumes' },
       { name: 'Courgettes', qty: 300, unit: 'g', cat: 'legumes' },
       { name: 'Oignons', qty: 100, unit: 'g', cat: 'epicerie' },
-      { name: 'Œufs', qty: 5, unit: 'unités', cat: 'oeufs' },
       { name: 'Pain complet', qty: 100, unit: 'g', cat: 'feculents' },
-    ], 30, { calories: 1100, protein: 55, fat: 40, carbs: 100 }),
+    ], 30, { calories: 780, protein: 32, fat: 30, carbs: 90 }),
   },
 ];
 
 /** Portions indicatives par membre (coeff. famille = 3,25 parts adultes) */
 export const AMISSE_PORTIONS = [
-  { member: 'Adulte 1 & 2', hint: 'Assiette complète (~1 part) · pizza : 2 parts / pers.' },
-  { member: 'Enfant 10 ans', hint: '≈ ¾ d’assiette · pizza : 1,5 part' },
-  { member: 'Enfant 4 ans', hint: '≈ ½ assiette · pizza : 1 part · découper' },
+  { member: 'Adulte 1 & 2', hint: 'Assiette complète (~1 part) · fromage : part adulte du top 10' },
+  { member: 'Enfant 10 ans', hint: '≈ ¾ d’assiette · fromage ≈ ¾ part adulte' },
+  { member: 'Enfant 4 ans', hint: '≈ ½ assiette · fromage ≈ ½ part · textures adaptées' },
 ];
 
 /**
- * Courses semaine famille — recalculées (dont pizza sarrasin du samedi)
- * Coeff. portions : 2×1 + 0,75 + 0,5 = 3,25
+ * Courses semaine famille — recalculées (pizza + top fromages légers)
  */
 export const AMISSE_SHOPPING_WEEK = [
   { id: 'a-poulet', name: 'Blanc de poulet (surgelé)', qty: 2.55, unit: 'kg', cat: 'viandes', priceKey: 'Blanc de poulet' },
@@ -235,7 +239,14 @@ export const AMISSE_SHOPPING_WEEK = [
   { id: 'a-thon', name: 'Thon (boîtes)', qty: 3, unit: 'boîtes', cat: 'conserves', priceKey: 'Thon (boîte)' },
   { id: 'a-thon-alt', name: 'Thon extra (si pizza sans escalope)', qty: 3, unit: 'boîtes', cat: 'conserves', priceKey: 'Thon (boîte)' },
   { id: 'a-maq', name: 'Maquereau (boîtes)', qty: 3, unit: 'boîtes', cat: 'conserves', priceKey: 'Maquereau (boîte)' },
-  { id: 'a-fb', name: 'Fromage blanc 0 %', qty: 2.5, unit: 'kg', cat: 'laitiers', priceKey: 'Fromage blanc 0 %' },
+  { id: 'a-fb', name: 'Fromage blanc 0 %', qty: 1.7, unit: 'kg', cat: 'laitiers', priceKey: 'Fromage blanc 0 %' },
+  { id: 'a-canco', name: 'Cancoillotte', qty: 0.25, unit: 'kg', cat: 'laitiers', priceKey: 'Cancoillotte' },
+  { id: 'a-ricotta', name: 'Ricotta', qty: 0.32, unit: 'kg', cat: 'laitiers', priceKey: 'Ricotta' },
+  { id: 'a-ffrais', name: 'Fromage frais', qty: 0.2, unit: 'kg', cat: 'laitiers', priceKey: 'Fromage frais' },
+  { id: 'a-chevre', name: 'Chèvre frais', qty: 0.13, unit: 'kg', cat: 'laitiers', priceKey: 'Fromage de chèvre frais' },
+  { id: 'a-feta', name: 'Feta', qty: 0.1, unit: 'kg', cat: 'laitiers', priceKey: 'Feta' },
+  { id: 'a-mozza', name: 'Mozzarella', qty: 0.12, unit: 'kg', cat: 'laitiers', priceKey: 'Mozzarella' },
+  { id: 'a-cam', name: 'Camembert', qty: 0.1, unit: 'kg', cat: 'laitiers', priceKey: 'Camembert' },
   { id: 'a-oeufs', name: 'Œufs', qty: 46, unit: 'unités', cat: 'oeufs', priceKey: 'Œufs' },
   { id: 'a-riz', name: 'Riz basmati', qty: 1.31, unit: 'kg', cat: 'feculents', priceKey: 'Riz basmati' },
   { id: 'a-lent', name: 'Lentilles', qty: 0.53, unit: 'kg', cat: 'feculents', priceKey: 'Lentilles' },
@@ -246,14 +257,14 @@ export const AMISSE_SHOPPING_WEEK = [
   { id: 'a-hv', name: 'Haricots verts (surgelés)', qty: 1.5, unit: 'kg', cat: 'legumes', priceKey: 'Haricots verts' },
   { id: 'a-courg', name: 'Courgettes', qty: 1.8, unit: 'kg', cat: 'legumes', priceKey: 'Courgettes' },
   { id: 'a-epi', name: 'Épinards (surgelés)', qty: 0.5, unit: 'kg', cat: 'legumes', priceKey: 'Épinards' },
-  { id: 'a-car', name: 'Carottes', qty: 1.7, unit: 'kg', cat: 'legumes', priceKey: 'Carottes' },
-  { id: 'a-tom', name: 'Tomates', qty: 1.85, unit: 'kg', cat: 'legumes', priceKey: 'Tomates' },
-  { id: 'a-sal', name: 'Salades', qty: 4, unit: 'unités', cat: 'legumes', priceKey: 'Salade' },
-  { id: 'a-pom', name: 'Pommes', qty: 11, unit: 'unités', cat: 'fruits', priceKey: 'Pomme' },
-  { id: 'a-ban', name: 'Bananes', qty: 14, unit: 'unités', cat: 'fruits', priceKey: 'Banane' },
-  { id: 'a-ora', name: 'Oranges', qty: 6, unit: 'unités', cat: 'fruits', priceKey: 'Orange' },
-  { id: 'a-amd', name: 'Amandes', qty: 0.1, unit: 'kg', cat: 'graisses', priceKey: 'Amandes' },
-  { id: 'a-huile', name: 'Huile d\'olive (quote-part)', qty: 0.3, unit: 'bouteille', cat: 'graisses', priceKey: 'Huile d\'olive' },
+  { id: 'a-car', name: 'Carottes', qty: 1.85, unit: 'kg', cat: 'legumes', priceKey: 'Carottes' },
+  { id: 'a-tom', name: 'Tomates', qty: 2.3, unit: 'kg', cat: 'legumes', priceKey: 'Tomates' },
+  { id: 'a-sal', name: 'Salades', qty: 5, unit: 'unités', cat: 'legumes', priceKey: 'Salade' },
+  { id: 'a-pom', name: 'Pommes', qty: 13, unit: 'unités', cat: 'fruits', priceKey: 'Pomme' },
+  { id: 'a-ban', name: 'Bananes', qty: 11, unit: 'unités', cat: 'fruits', priceKey: 'Banane' },
+  { id: 'a-ora', name: 'Oranges', qty: 4, unit: 'unités', cat: 'fruits', priceKey: 'Orange' },
+  { id: 'a-amd', name: 'Amandes', qty: 0.05, unit: 'kg', cat: 'graisses', priceKey: 'Amandes' },
+  { id: 'a-huile', name: 'Huile d\'olive (quote-part)', qty: 0.28, unit: 'bouteille', cat: 'graisses', priceKey: 'Huile d\'olive' },
   { id: 'a-oignon', name: 'Oignons', qty: 0.65, unit: 'kg', cat: 'epicerie', priceKey: 'Oignons' },
 ];
 
@@ -266,9 +277,15 @@ export const AMISSE_BATCH = [
   },
   {
     name: 'Pâte pizza sarrasin',
-    tips: '380 g farine + eau + 1 c.à.s huile. Étaler fine. Garnir légumes + escalope grillée (ou thon égoutté). Four 220 °C · 15–18 min. 6–7 parts : 2 / adulte, 1,5 / 10 ans, 1 / 4 ans.',
+    tips: '380 g farine + eau + 1 c.à.s huile. Étaler fine. Garnir légumes + escalope (ou thon) + 120 g mozzarella. Four 220 °C · 15–18 min.',
     timeMin: 45,
     savedMin: 30,
+  },
+  {
+    name: 'Fromages légers portionnés',
+    tips: 'Top 10 kcal : blanc 0 %, cancoillotte, ricotta, frais, chèvre, feta, camembert, coulommiers, mozzarella, Mont d\'Or. Barquettes famille / sport.',
+    timeMin: 10,
+    savedMin: 15,
   },
   {
     name: 'Riz + pommes de terre batch',

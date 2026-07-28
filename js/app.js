@@ -46,6 +46,7 @@ import {
   getAmisseDayIndex,
   amisseDayTotals,
 } from './data/amisse.js';
+import { CHEESES, CHEESE_RULES, cheesePortions } from './data/cheeses.js';
 
 /* ---------- Icons (inline SVG) ---------- */
 const ICONS = {
@@ -82,7 +83,7 @@ const state = {
   cycleStart: null,
   goal: 'seche',
   theme: 'dark',
-  amisseTab: 'today', // today | week | shopping | batch
+  amisseTab: 'today', // today | week | cheeses | shopping | batch
   amisseSelectedDate: formatDateISO(),
 };
 
@@ -560,6 +561,7 @@ async function viewAmisse() {
     <div class="day-nav">
       <button class="chip ${state.amisseTab === 'today' ? 'active' : ''}" data-amisse="today">Aujourd'hui</button>
       <button class="chip ${state.amisseTab === 'week' ? 'active' : ''}" data-amisse="week">Calendrier</button>
+      <button class="chip ${state.amisseTab === 'cheeses' ? 'active' : ''}" data-amisse="cheeses">Fromages</button>
       <button class="chip ${state.amisseTab === 'shopping' ? 'active' : ''}" data-amisse="shopping">Courses</button>
       <button class="chip ${state.amisseTab === 'batch' ? 'active' : ''}" data-amisse="batch">Batch</button>
     </div>`;
@@ -627,6 +629,36 @@ async function viewAmisse() {
               <span class="tag">${t.protein} g prot</span>
             </div>
           </button>`;
+      }).join('')}
+    `;
+  } else if (state.amisseTab === 'cheeses') {
+    body = `
+      <div class="hero-dash amisse-hero">
+        <div class="eyebrow">Top 10 · moins caloriques</div>
+        <h2>Fromages légers</h2>
+        <p>Plus d’eau = moins de kcal · portions famille & sport recalculées</p>
+      </div>
+      <ul class="future-list surface" style="padding:0;margin-bottom:1rem">
+        ${CHEESE_RULES.map((r) => `<li>${r}</li>`).join('')}
+      </ul>
+      ${CHEESES.map((c) => {
+        const p = cheesePortions(c);
+        return `
+          <article class="batch-card cheese-card">
+            <h3>#${c.rank} · ${c.name}</h3>
+            <p>${c.tip}</p>
+            <div class="batch-meta">
+              <span class="tag">${c.kcal100} kcal/100g</span>
+              <span class="tag">${c.fat100} g lip/100g</span>
+            </div>
+            <div class="cheese-grid">
+              <div><strong>Sport (indiv.)</strong><span>${p.individual.grams} g · ${p.individual.calories} kcal · P ${p.individual.protein} g</span></div>
+              <div><strong>Famille</strong><span>${p.family.grams} g · ${p.family.calories} kcal</span></div>
+              <div><strong>Adulte</strong><span>${p.adult.grams} g · ${p.adult.calories} kcal</span></div>
+              <div><strong>Enfant 10 ans</strong><span>${p.child10.grams} g · ${p.child10.calories} kcal</span></div>
+              <div><strong>Enfant 4 ans</strong><span>${p.child4.grams} g · ${p.child4.calories} kcal</span></div>
+            </div>
+          </article>`;
       }).join('')}
     `;
   } else if (state.amisseTab === 'shopping') {

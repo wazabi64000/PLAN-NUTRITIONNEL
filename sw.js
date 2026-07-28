@@ -1,5 +1,5 @@
 /* Meal Planner — Service Worker Offline First */
-const CACHE = 'meal-planner-v7';
+const CACHE = 'meal-planner-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const ASSETS = [
   './js/data/meals.js',
   './js/data/shopping.js',
   './js/data/amisse.js',
+  './js/data/cheeses.js',
   './manifest.json',
   './icons/icon.svg',
   './icons/icon-192.png',

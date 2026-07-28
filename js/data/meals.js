@@ -82,9 +82,9 @@ export const MENU_A = [
       { name: 'Pomme de terre', qty: 200, unit: 'g', cat: 'feculents' },
       { name: 'Carottes', qty: 100, unit: 'g', cat: 'legumes' },
     ], 25, { kcal: 480, p: 35, f: 10, c: 55 }),
-    snack: meal('Fromage blanc 0 %', [
-      { name: 'Fromage blanc 0 %', qty: 200, unit: 'g', cat: 'laitiers' },
-    ], 1, { kcal: 100, p: 16, f: 0, c: 8 }),
+    snack: meal('Cancoillotte', [
+      { name: 'Cancoillotte', qty: 80, unit: 'g', cat: 'laitiers' },
+    ], 1, { kcal: 94, p: 11, f: 3, c: 2 }),
     dinner: meal('Maquereau + salade', [
       { name: 'Maquereau (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
       { name: 'Salade', qty: 120, unit: 'g', cat: 'legumes' },
@@ -164,9 +164,9 @@ export const MENU_A = [
       { name: 'Courgettes', qty: 100, unit: 'g', cat: 'legumes' },
       { name: 'Huile d\'olive', qty: 5, unit: 'ml', cat: 'graisses' },
     ], 40, { kcal: 540, p: 52, f: 10, c: 55 }),
-    snack: meal('Fromage blanc 0 %', [
-      { name: 'Fromage blanc 0 %', qty: 200, unit: 'g', cat: 'laitiers' },
-    ], 1, { kcal: 100, p: 16, f: 0, c: 8 }),
+    snack: meal('Ricotta', [
+      { name: 'Ricotta', qty: 100, unit: 'g', cat: 'laitiers' },
+    ], 1, { kcal: 174, p: 11, f: 13, c: 3 }),
     dinner: meal('Colin + salade', [
       { name: 'Colin', qty: 180, unit: 'g', cat: 'poissons' },
       { name: 'Salade', qty: 120, unit: 'g', cat: 'legumes' },
@@ -204,9 +204,9 @@ export const MENU_A = [
       { name: 'Riz basmati', qty: 80, unit: 'g', cat: 'feculents' },
       { name: 'Épinards', qty: 200, unit: 'g', cat: 'legumes' },
     ], 25, { kcal: 490, p: 48, f: 6, c: 52 }),
-    snack: meal('Fromage blanc 0 %', [
-      { name: 'Fromage blanc 0 %', qty: 200, unit: 'g', cat: 'laitiers' },
-    ], 1, { kcal: 100, p: 16, f: 0, c: 8 }),
+    snack: meal('Fromage de chèvre frais', [
+      { name: 'Fromage de chèvre frais', qty: 40, unit: 'g', cat: 'laitiers' },
+    ], 1, { kcal: 88, p: 6, f: 6, c: 1 }),
     dinner: meal('Omelette + tomates', [
       { name: 'Œufs', qty: 3, unit: 'unités', cat: 'oeufs' },
       { name: 'Tomates', qty: 150, unit: 'g', cat: 'legumes' },
@@ -365,9 +365,9 @@ export const MENU_B = [
       { name: 'Riz basmati', qty: 70, unit: 'g', cat: 'feculents' },
       { name: 'Carottes', qty: 150, unit: 'g', cat: 'legumes' },
     ], 25, { kcal: 480, p: 48, f: 8, c: 42 }),
-    snack: meal('Fromage blanc 0 %', [
-      { name: 'Fromage blanc 0 %', qty: 200, unit: 'g', cat: 'laitiers' },
-    ], 1, { kcal: 100, p: 16, f: 0, c: 8 }),
+    snack: meal('Cancoillotte', [
+      { name: 'Cancoillotte', qty: 80, unit: 'g', cat: 'laitiers' },
+    ], 1, { kcal: 94, p: 11, f: 3, c: 2 }),
     dinner: meal('Maquereau + salade + tomates', [
       { name: 'Maquereau (boîte)', qty: 1, unit: 'boîte', cat: 'poissons' },
       { name: 'Salade', qty: 120, unit: 'g', cat: 'legumes' },
