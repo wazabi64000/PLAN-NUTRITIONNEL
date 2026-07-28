@@ -720,8 +720,11 @@ function setupPwa() {
 
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
+  const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || '12';
   try {
-    const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+    const reg = await navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`, {
+      updateViaCache: 'none',
+    });
     await reg.update();
     const askReload = (worker) => worker.postMessage('SKIP_WAITING');
     if (reg.waiting) askReload(reg.waiting);
@@ -738,6 +741,10 @@ async function registerSW() {
       refreshing = true;
       toast('Mise à jour PWA appliquée');
       setTimeout(() => window.location.reload(), 400);
+    });
+    setInterval(() => reg.update().catch(() => {}), 60_000);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update().catch(() => {});
     });
   } catch (e) {
     console.warn('SW non enregistré', e);
