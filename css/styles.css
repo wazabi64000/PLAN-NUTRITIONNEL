@@ -1188,6 +1188,88 @@ a {
   background: linear-gradient(var(--orange), var(--yellow));
 }
 
+.amisse-cal-grid .cal-day.amisse-cal {
+  min-height: 52px;
+  gap: 0.1rem;
+}
+
+.amisse-cal-grid .cal-num {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.amisse-cal-grid .cal-day.selected {
+  outline-color: var(--orange);
+  background: rgba(242, 157, 6, 0.18);
+}
+
+.amisse-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.amisse-week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.2rem;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-align: center;
+  min-height: 64px;
+}
+
+.amisse-week-day strong {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.amisse-week-day span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.amisse-week-day.is-today {
+  border-color: var(--orange);
+}
+
+.amisse-week-day.is-selected {
+  background: linear-gradient(135deg, rgba(242, 157, 6, 0.25), rgba(252, 224, 6, 0.15));
+  border-color: var(--orange);
+  color: var(--text);
+}
+
+button.batch-card {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+button.batch-card.is-selected {
+  border-color: var(--cyan);
+}
+
+@media (max-width: 420px) {
+  .amisse-week-day span {
+    display: none;
+  }
+  .amisse-week-day {
+    min-height: 44px;
+  }
+}
+
 /* ---- Animations ---- */
 @keyframes fade-up {
   from {

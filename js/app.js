@@ -16,6 +16,7 @@ import {
   addDays,
   formatFR,
   formatShort,
+  parseISO,
   getCycleDay,
   getCycleWeek,
   getDayPlan,
@@ -82,6 +83,7 @@ const state = {
   goal: 'seche',
   theme: 'dark',
   amisseTab: 'today', // today | week | shopping | batch
+  amisseSelectedDate: formatDateISO(),
 };
 
 /* ---------- Toast ---------- */
@@ -557,7 +559,7 @@ async function viewAmisse() {
   const tabs = `
     <div class="day-nav">
       <button class="chip ${state.amisseTab === 'today' ? 'active' : ''}" data-amisse="today">Aujourd'hui</button>
-      <button class="chip ${state.amisseTab === 'week' ? 'active' : ''}" data-amisse="week">Semaine</button>
+      <button class="chip ${state.amisseTab === 'week' ? 'active' : ''}" data-amisse="week">Calendrier</button>
       <button class="chip ${state.amisseTab === 'shopping' ? 'active' : ''}" data-amisse="shopping">Courses</button>
       <button class="chip ${state.amisseTab === 'batch' ? 'active' : ''}" data-amisse="batch">Batch</button>
     </div>`;
@@ -588,20 +590,43 @@ async function viewAmisse() {
       <p class="page-sub">Le programme Sport (sèche / masse) reste inchangé dans les autres onglets.</p>
     `;
   } else if (state.amisseTab === 'week') {
+    const selected = state.amisseSelectedDate || today;
+    const selectedPlan = getAmisseDayPlan(parseISO(selected));
+    const selectedTotals = amisseDayTotals(selectedPlan);
+    const selectedDaily = await getOrCreateDaily(selected, 'amisse:');
     body = `
-      <div class="section-label">Semaine type · rotation chaque lundi</div>
+      ${renderAmisseCalendar(today, selected)}
+      <div class="section-label">Programme de la semaine</div>
+      <div class="amisse-week-strip">
+        ${AMISSE_WEEK.map((d, idx) => {
+          const isToday = idx === getAmisseDayIndex(new Date());
+          const isSelected = idx === getAmisseDayIndex(parseISO(selected));
+          return `
+            <button type="button" class="amisse-week-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''}" data-amisse-weekday="${idx}">
+              <strong>${d.label.slice(0, 3)}</strong>
+              <span>${d.dinner.name.split('·')[0].trim().slice(0, 18)}</span>
+            </button>`;
+        }).join('')}
+      </div>
+      <div class="section-label" style="text-transform:capitalize">${formatFR(selected)} · ${selectedPlan.label}</div>
+      <p class="page-sub" style="margin-top:-.35rem">${selectedTotals.calories} kcal famille · ${selectedTotals.protein} g protéines</p>
+      <div class="meal-list">
+        ${MEAL_TYPES.map((t) => renderMealCard(selectedPlan[t.id], t, selectedDaily.mealsDone?.[t.id], selected, 'amisse:')).join('')}
+      </div>
+      <div class="section-label">Récap semaine</div>
       ${AMISSE_WEEK.map((d, idx) => {
         const t = amisseDayTotals(d);
         const isToday = idx === getAmisseDayIndex(new Date());
+        const isSelected = idx === getAmisseDayIndex(parseISO(selected));
         return `
-          <article class="batch-card ${isToday ? 'amisse-today' : ''}">
+          <button type="button" class="batch-card amisse-week-card ${isToday ? 'amisse-today' : ''} ${isSelected ? 'is-selected' : ''}" data-amisse-weekday="${idx}">
             <h3>${d.label}${isToday ? ' · aujourd’hui' : ''}</h3>
-            <p>${d.breakfast.name} · ${d.lunch.name} · ${d.snack.name} · ${d.dinner.name}</p>
+            <p>${d.breakfast.name} · ${d.lunch.name}<br>${d.snack.name} · ${d.dinner.name}</p>
             <div class="batch-meta">
               <span class="tag">${t.calories} kcal</span>
               <span class="tag">${t.protein} g prot</span>
             </div>
-          </article>`;
+          </button>`;
       }).join('')}
     `;
   } else if (state.amisseTab === 'shopping') {
@@ -684,6 +709,26 @@ function bindAmisse() {
   document.querySelectorAll('[data-amisse]').forEach((btn) => {
     btn.onclick = () => {
       state.amisseTab = btn.dataset.amisse;
+      if (btn.dataset.amisse === 'week' && !state.amisseSelectedDate) {
+        state.amisseSelectedDate = formatDateISO();
+      }
+      renderPage();
+    };
+  });
+  document.querySelectorAll('[data-amisse-cal]').forEach((btn) => {
+    btn.onclick = () => {
+      state.amisseSelectedDate = btn.dataset.amisseCal;
+      state.amisseTab = 'week';
+      renderPage();
+    };
+  });
+  document.querySelectorAll('[data-amisse-weekday]').forEach((btn) => {
+    btn.onclick = () => {
+      const idx = Number(btn.dataset.amisseWeekday);
+      const ref = state.amisseSelectedDate || formatDateISO();
+      const refIdx = getAmisseDayIndex(parseISO(ref));
+      state.amisseSelectedDate = addDays(ref, idx - refIdx);
+      state.amisseTab = 'week';
       renderPage();
     };
   });
@@ -697,6 +742,40 @@ function bindAmisse() {
     };
   });
   bindMealCards();
+}
+
+function renderAmisseCalendar(todayISO, selectedISO) {
+  const base = parseISO(selectedISO || todayISO);
+  const year = base.getFullYear();
+  const month = base.getMonth();
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = new Date(year, month, 1).toLocaleDateString('fr-FR', {
+    month: 'long',
+    year: 'numeric',
+  });
+  const labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+  let cells = labels.map((d) => `<div class="cal-head">${d}</div>`).join('');
+  for (let i = 0; i < firstDow; i++) cells += `<div class="cal-day empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = formatDateISO(new Date(year, month, d));
+    const plan = getAmisseDayPlan(new Date(year, month, d));
+    const short = plan.label.slice(0, 3);
+    const isToday = iso === todayISO;
+    const selected = iso === selectedISO;
+    cells += `
+      <button class="cal-day amisse-cal ${isToday ? 'today' : ''} ${selected ? 'selected' : ''}" data-amisse-cal="${iso}" type="button">
+        <span class="cal-num">${d}</span>
+        <span class="phase">${short}</span>
+      </button>`;
+  }
+
+  return `
+    <div class="section-label" style="text-transform:capitalize">${monthName}</div>
+    <div class="cal-grid amisse-cal-grid">${cells}</div>
+    <p class="page-sub" style="margin-top:.85rem">Touchez un jour : le programme Amisse suit le jour de la semaine (Lun→Dim, en boucle).</p>
+  `;
 }
 
 /* ===== SETTINGS ===== */
