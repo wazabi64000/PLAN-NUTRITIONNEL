@@ -1,5 +1,5 @@
 /* Meal Planner — Service Worker Offline First */
-const CACHE = 'meal-planner-v2';
+const CACHE = 'meal-planner-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -14,6 +14,9 @@ const ASSETS = [
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
+  './icons/apple-touch-icon.png',
   './fonts/dmsans-latin.woff2',
   './fonts/dmsans-latin-ext.woff2',
   './fonts/outfit-latin.woff2',
@@ -22,15 +25,19 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
@@ -38,10 +45,26 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
 
-  // Ne jamais intercepter les requêtes cross-origin (évite CORS / undefined)
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  // Navigation : network first, fallback cache / index (offline shell)
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE).then((cache) => cache.put('./index.html', clone));
+          return response;
+        })
+        .catch(() =>
+          caches.match(request).then((r) => r || caches.match('./index.html'))
+        )
+    );
+    return;
+  }
+
+  // Assets : cache first, puis réseau
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetched = fetch(request)
@@ -57,4 +80,8 @@ self.addEventListener('fetch', (event) => {
       return cached || fetched;
     })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });

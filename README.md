@@ -2,6 +2,8 @@
 
 PWA nutritionnelle **halal**, 100 % locale, pour suivre une **sèche** ou une **prise de masse** sur **60 jours**.
 
+**Démo en ligne :** [https://wazabi64000.github.io/PLAN-NUTRITIONNEL/](https://wazabi64000.github.io/PLAN-NUTRITIONNEL/)
+
 Stack : **HTML · CSS · JavaScript** (vanilla) · IndexedDB · Service Worker · Manifest.
 
 Palette **Nutrition 5** : `#D2EE6B` · `#00BCD4` · `#079AA9` · `#FCE006` · `#F29D06`.
@@ -21,7 +23,9 @@ Palette **Nutrition 5** : `#D2EE6B` · `#00BCD4` · `#079AA9` · `#FCE006` · `#
 
 ## Démarrage
 
-Serveur local obligatoire (modules ES + Service Worker) :
+Version déployée : [https://wazabi64000.github.io/PLAN-NUTRITIONNEL/](https://wazabi64000.github.io/PLAN-NUTRITIONNEL/)
+
+Serveur local (modules ES + Service Worker) :
 
 ```bash
 # Python
@@ -35,9 +39,14 @@ Ouvrir [http://localhost:5173](http://localhost:5173).
 
 ### Installation PWA
 
-- **Android / Chrome** : menu → Installer l’application
-- **iPhone** : Safari → Partager → Sur l’écran d’accueil
+L’app est installable (manifest + service worker `v3` + icônes maskable).
+
+- **Android / Chrome / Edge** : bannière « Installer » ou menu → Installer l’application
+- **iPhone / iPad** : Safari → Partager → Sur l’écran d’accueil
 - **Windows** : Edge / Chrome → icône d’installation dans la barre d’adresse
+- **Réglages** : statut PWA + bouton d’installation
+
+Nécessite **HTTPS** ou **localhost** (la démo GitHub Pages convient).
 
 ---
 

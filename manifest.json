@@ -1,14 +1,17 @@
 {
+  "id": "./",
   "name": "Meal Planner",
   "short_name": "Meal Planner",
   "description": "Plan nutritionnel halal 60 jours — sèche & prise de masse. Offline, local.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#061618",
   "theme_color": "#079AA9",
   "lang": "fr",
+  "dir": "ltr",
   "icons": [
     {
       "src": "./icons/icon.svg",
@@ -20,14 +23,27 @@
       "src": "./icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "./icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["health", "food", "lifestyle"]
+  "categories": ["health", "food", "lifestyle"],
+  "prefer_related_applications": false
 }

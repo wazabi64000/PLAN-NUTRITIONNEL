@@ -563,6 +563,23 @@ async function viewSettings() {
       <div style="display:flex;justify-content:space-between"><span>60 jours</span><strong style="color:var(--orange)">${euro(budget.days60)}</strong></div>
     </div>
 
+    <div class="section-label">Application (PWA)</div>
+    <div class="surface" style="margin-bottom:1rem">
+      <div class="pwa-status" style="margin-bottom:.75rem">
+        <span class="pwa-dot ${isStandalone() ? 'on' : ''}"></span>
+        <span>${pwaStatusLabel()}</span>
+      </div>
+      ${
+        canInstall()
+          ? `<button class="btn btn-accent btn-block" id="settings-install">Installer sur cet appareil</button>`
+          : isIOS() && !isStandalone()
+            ? `<p class="page-sub" style="margin:0">iPhone : Safari → Partager → <strong>Sur l’écran d’accueil</strong></p>`
+            : isStandalone()
+              ? `<p class="page-sub" style="margin:0">Application installée · mode hors ligne actif</p>`
+              : `<p class="page-sub" style="margin:0">Ouvre l’app en HTTPS ou localhost pour pouvoir l’installer.</p>`
+      }
+    </div>
+
     <div class="section-label">Données</div>
     <button class="btn btn-orange btn-block" id="reset-all">Réinitialiser toutes les données</button>
 
@@ -603,6 +620,7 @@ function bindSettings() {
     toast('Cycle redémarré au jour 1');
     renderPage();
   });
+  document.getElementById('settings-install')?.addEventListener('click', () => triggerInstall());
   document.getElementById('reset-all')?.addEventListener('click', async () => {
     if (!confirm('Effacer toutes les données locales ?')) return;
     await resetAllData();
@@ -620,6 +638,100 @@ function bindSettings() {
   });
 }
 
+/* ---------- PWA ---------- */
+let deferredInstallPrompt = null;
+
+function isStandalone() {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  );
+}
+
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function canInstall() {
+  return !!deferredInstallPrompt;
+}
+
+function pwaStatusLabel() {
+  if (isStandalone()) return 'Installée (standalone)';
+  if (canInstall()) return 'Prête à installer';
+  if (isIOS()) return 'iOS · ajout via Safari';
+  return 'Navigateur · PWA détectée';
+}
+
+function showInstallBanner() {
+  const banner = document.getElementById('install-banner');
+  if (!banner) return;
+  if (isStandalone() || sessionStorage.getItem('mp_install_dismissed')) {
+    banner.hidden = true;
+    return;
+  }
+  if (canInstall() || isIOS()) banner.hidden = false;
+}
+
+async function triggerInstall() {
+  if (!deferredInstallPrompt) {
+    if (isIOS()) {
+      toast('Safari → Partager → Sur l’écran d’accueil');
+      return;
+    }
+    toast('Installation non disponible ici');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById('install-banner').hidden = true;
+  toast(outcome === 'accepted' ? 'Application installée ✓' : 'Installation annulée');
+  if (state.route === 'settings') renderPage();
+}
+
+function setupPwa() {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showInstallBanner();
+    if (state.route === 'settings') renderPage();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    const banner = document.getElementById('install-banner');
+    if (banner) banner.hidden = true;
+    toast('Meal Planner installé ✓');
+  });
+
+  document.getElementById('install-btn')?.addEventListener('click', () => triggerInstall());
+  document.getElementById('install-dismiss')?.addEventListener('click', () => {
+    sessionStorage.setItem('mp_install_dismissed', '1');
+    document.getElementById('install-banner').hidden = true;
+  });
+
+  if (isIOS() && !isStandalone()) showInstallBanner();
+}
+
+async function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('./sw.js');
+    reg.addEventListener('updatefound', () => {
+      const worker = reg.installing;
+      if (!worker) return;
+      worker.addEventListener('statechange', () => {
+        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+          toast('Mise à jour disponible — recharge');
+        }
+      });
+    });
+  } catch (e) {
+    console.warn('SW non enregistré', e);
+  }
+}
+
 /* ---------- Boot ---------- */
 async function boot() {
   await initDB();
@@ -630,15 +742,8 @@ async function boot() {
   applyTheme();
   renderShell();
   await renderPage();
-
-  // PWA service worker
-  if ('serviceWorker' in navigator) {
-    try {
-      await navigator.serviceWorker.register('./sw.js');
-    } catch (e) {
-      console.warn('SW non enregistré', e);
-    }
-  }
+  setupPwa();
+  await registerSW();
 }
 
 boot();
