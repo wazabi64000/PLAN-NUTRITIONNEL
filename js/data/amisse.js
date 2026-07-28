@@ -176,12 +176,15 @@ export const AMISSE_WEEK = [
       { name: 'Pomme', qty: 2, unit: 'unités', cat: 'fruits' },
       { name: 'Orange', qty: 2, unit: 'unités', cat: 'fruits' },
     ], 2, { calories: 280, protein: 2, fat: 0, carbs: 70 }),
-    dinner: meal('Colin + légumes + pain complet', [
-      { name: 'Colin', qty: 550, unit: 'g', cat: 'poissons' },
-      { name: 'Haricots verts', qty: 500, unit: 'g', cat: 'legumes' },
+    dinner: meal('Pizza sarrasin · légumes + escalope (ou thon)', [
+      { name: 'Farine de sarrasin', qty: 380, unit: 'g', cat: 'feculents' },
+      { name: 'Escalope de dinde (ou 3 boîtes thon)', qty: 450, unit: 'g', cat: 'viandes' },
+      { name: 'Tomates', qty: 400, unit: 'g', cat: 'legumes' },
       { name: 'Courgettes', qty: 300, unit: 'g', cat: 'legumes' },
-      { name: 'Pain complet', qty: 160, unit: 'g', cat: 'feculents' },
-    ], 30, { calories: 1600, protein: 120, fat: 25, carbs: 150 }),
+      { name: 'Oignons', qty: 150, unit: 'g', cat: 'epicerie' },
+      { name: 'Huile d\'olive', qty: 25, unit: 'ml', cat: 'graisses' },
+      { name: 'Herbes de Provence', qty: 1, unit: 'c.à.c', cat: 'epicerie' },
+    ], 45, { calories: 2240, protein: 170, fat: 46, carbs: 278 }),
   },
   {
     day: 7,
@@ -213,39 +216,45 @@ export const AMISSE_WEEK = [
   },
 ];
 
-/** Portions indicatives par membre */
+/** Portions indicatives par membre (coeff. famille = 3,25 parts adultes) */
 export const AMISSE_PORTIONS = [
-  { member: 'Adulte 1 & 2', hint: 'Assiette complète (~1 part)' },
-  { member: 'Enfant 10 ans', hint: '≈ ¾ d’assiette adulte' },
-  { member: 'Enfant 4 ans', hint: '≈ ½ assiette adulte · découper / adapter textures' },
+  { member: 'Adulte 1 & 2', hint: 'Assiette complète (~1 part) · pizza : 2 parts / pers.' },
+  { member: 'Enfant 10 ans', hint: '≈ ¾ d’assiette · pizza : 1,5 part' },
+  { member: 'Enfant 4 ans', hint: '≈ ½ assiette · pizza : 1 part · découper' },
 ];
 
+/**
+ * Courses semaine famille — recalculées (dont pizza sarrasin du samedi)
+ * Coeff. portions : 2×1 + 0,75 + 0,5 = 3,25
+ */
 export const AMISSE_SHOPPING_WEEK = [
-  { id: 'a-poulet', name: 'Blanc de poulet (surgelé)', qty: 2.6, unit: 'kg', cat: 'viandes', priceKey: 'Blanc de poulet' },
-  { id: 'a-dinde', name: 'Escalope de dinde (surgelé)', qty: 1.1, unit: 'kg', cat: 'viandes', priceKey: 'Escalope de dinde' },
+  { id: 'a-poulet', name: 'Blanc de poulet (surgelé)', qty: 2.55, unit: 'kg', cat: 'viandes', priceKey: 'Blanc de poulet' },
+  { id: 'a-dinde', name: 'Escalope de dinde (surgelé)', qty: 1.55, unit: 'kg', cat: 'viandes', priceKey: 'Escalope de dinde' },
   { id: 'a-steak', name: 'Steak haché halal 5 %', qty: 0.5, unit: 'kg', cat: 'viandes', priceKey: 'Steak haché halal 5 %' },
-  { id: 'a-colin', name: 'Colin (surgelé)', qty: 1.2, unit: 'kg', cat: 'poissons', priceKey: 'Colin' },
+  { id: 'a-colin', name: 'Colin (surgelé)', qty: 0.6, unit: 'kg', cat: 'poissons', priceKey: 'Colin' },
   { id: 'a-thon', name: 'Thon (boîtes)', qty: 3, unit: 'boîtes', cat: 'conserves', priceKey: 'Thon (boîte)' },
+  { id: 'a-thon-alt', name: 'Thon extra (si pizza sans escalope)', qty: 3, unit: 'boîtes', cat: 'conserves', priceKey: 'Thon (boîte)' },
   { id: 'a-maq', name: 'Maquereau (boîtes)', qty: 3, unit: 'boîtes', cat: 'conserves', priceKey: 'Maquereau (boîte)' },
   { id: 'a-fb', name: 'Fromage blanc 0 %', qty: 2.5, unit: 'kg', cat: 'laitiers', priceKey: 'Fromage blanc 0 %' },
   { id: 'a-oeufs', name: 'Œufs', qty: 46, unit: 'unités', cat: 'oeufs', priceKey: 'Œufs' },
-  { id: 'a-riz', name: 'Riz basmati', qty: 1.5, unit: 'kg', cat: 'feculents', priceKey: 'Riz basmati' },
-  { id: 'a-lent', name: 'Lentilles', qty: 0.6, unit: 'kg', cat: 'feculents', priceKey: 'Lentilles' },
-  { id: 'a-pdt', name: 'Pommes de terre', qty: 3.2, unit: 'kg', cat: 'feculents', priceKey: 'Pomme de terre' },
-  { id: 'a-avoine', name: 'Flocons d\'avoine', qty: 0.7, unit: 'kg', cat: 'feculents', priceKey: 'Flocons d\'avoine' },
-  { id: 'a-pain', name: 'Pain complet', qty: 3, unit: 'unités', cat: 'feculents', priceKey: 'Pain complet' },
-  { id: 'a-hv', name: 'Haricots verts (surgelés)', qty: 2, unit: 'kg', cat: 'legumes', priceKey: 'Haricots verts' },
-  { id: 'a-courg', name: 'Courgettes', qty: 1.5, unit: 'kg', cat: 'legumes', priceKey: 'Courgettes' },
+  { id: 'a-riz', name: 'Riz basmati', qty: 1.31, unit: 'kg', cat: 'feculents', priceKey: 'Riz basmati' },
+  { id: 'a-lent', name: 'Lentilles', qty: 0.53, unit: 'kg', cat: 'feculents', priceKey: 'Lentilles' },
+  { id: 'a-pdt', name: 'Pommes de terre', qty: 2.4, unit: 'kg', cat: 'feculents', priceKey: 'Pomme de terre' },
+  { id: 'a-avoine', name: 'Flocons d\'avoine', qty: 0.62, unit: 'kg', cat: 'feculents', priceKey: 'Flocons d\'avoine' },
+  { id: 'a-sarrasin', name: 'Farine de sarrasin', qty: 0.4, unit: 'kg', cat: 'feculents', priceKey: 'Farine de sarrasin' },
+  { id: 'a-pain', name: 'Pain complet', qty: 2, unit: 'unités', cat: 'feculents', priceKey: 'Pain complet' },
+  { id: 'a-hv', name: 'Haricots verts (surgelés)', qty: 1.5, unit: 'kg', cat: 'legumes', priceKey: 'Haricots verts' },
+  { id: 'a-courg', name: 'Courgettes', qty: 1.8, unit: 'kg', cat: 'legumes', priceKey: 'Courgettes' },
   { id: 'a-epi', name: 'Épinards (surgelés)', qty: 0.5, unit: 'kg', cat: 'legumes', priceKey: 'Épinards' },
-  { id: 'a-car', name: 'Carottes', qty: 2, unit: 'kg', cat: 'legumes', priceKey: 'Carottes' },
-  { id: 'a-tom', name: 'Tomates', qty: 1.4, unit: 'kg', cat: 'legumes', priceKey: 'Tomates' },
+  { id: 'a-car', name: 'Carottes', qty: 1.7, unit: 'kg', cat: 'legumes', priceKey: 'Carottes' },
+  { id: 'a-tom', name: 'Tomates', qty: 1.85, unit: 'kg', cat: 'legumes', priceKey: 'Tomates' },
   { id: 'a-sal', name: 'Salades', qty: 4, unit: 'unités', cat: 'legumes', priceKey: 'Salade' },
   { id: 'a-pom', name: 'Pommes', qty: 11, unit: 'unités', cat: 'fruits', priceKey: 'Pomme' },
   { id: 'a-ban', name: 'Bananes', qty: 14, unit: 'unités', cat: 'fruits', priceKey: 'Banane' },
   { id: 'a-ora', name: 'Oranges', qty: 6, unit: 'unités', cat: 'fruits', priceKey: 'Orange' },
   { id: 'a-amd', name: 'Amandes', qty: 0.1, unit: 'kg', cat: 'graisses', priceKey: 'Amandes' },
-  { id: 'a-huile', name: 'Huile d\'olive (quote-part)', qty: 0.25, unit: 'bouteille', cat: 'graisses', priceKey: 'Huile d\'olive' },
-  { id: 'a-oignon', name: 'Oignons', qty: 0.5, unit: 'kg', cat: 'epicerie', priceKey: 'Oignons' },
+  { id: 'a-huile', name: 'Huile d\'olive (quote-part)', qty: 0.3, unit: 'bouteille', cat: 'graisses', priceKey: 'Huile d\'olive' },
+  { id: 'a-oignon', name: 'Oignons', qty: 0.65, unit: 'kg', cat: 'epicerie', priceKey: 'Oignons' },
 ];
 
 export const AMISSE_BATCH = [
@@ -254,6 +263,12 @@ export const AMISSE_BATCH = [
     tips: '1,2–1,5 kg pour 2–3 repas · paprika + herbes · portionner.',
     timeMin: 50,
     savedMin: 70,
+  },
+  {
+    name: 'Pâte pizza sarrasin',
+    tips: '380 g farine + eau + 1 c.à.s huile. Étaler fine. Garnir légumes + escalope grillée (ou thon égoutté). Four 220 °C · 15–18 min. 6–7 parts : 2 / adulte, 1,5 / 10 ans, 1 / 4 ans.',
+    timeMin: 45,
+    savedMin: 30,
   },
   {
     name: 'Riz + pommes de terre batch',

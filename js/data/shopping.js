@@ -31,6 +31,7 @@ export const PRICES = {
   'Lentilles': { unit: 'kg', price: 1.19 },
   'Pomme de terre': { unit: 'kg', price: 0.69 },
   'Flocons d\'avoine': { unit: 'kg', price: 0.85 },
+  'Farine de sarrasin': { unit: 'kg', price: 2.49 },
   'Pain complet': { unit: 'unité', price: 0.85 },
   'Haricots verts': { unit: 'kg', price: 1.39 },
   'Courgettes': { unit: 'kg', price: 1.29 },
